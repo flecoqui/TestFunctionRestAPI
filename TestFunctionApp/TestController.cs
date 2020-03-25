@@ -25,24 +25,24 @@ namespace TestFunctionApp
             if (req.Method.ToLower() == "get")
                 return await Task.FromResult(new JsonResult(new List<TestResponse>
             {
-                new TestResponse {name="HttpPostTimerMs", value=ValuesController.HttpPostTimer.ToString()},
-                new TestResponse {name="HttpPostCounter", value=ValuesController.HttpPostCounter.ToString()},
-                new TestResponse {name="HttpPostStartTime", value=ValuesController.HttpPostStartTime.ToString()},
-                new TestResponse {name="HttpPostEndTime", value=ValuesController.HttpPostEndTime.ToString()}
+                new TestResponse {name="HttpTimerMs", value=ValuesController.HttpTimer.ToString()},
+                new TestResponse {name="HttpCounter", value=ValuesController.HttpCounter.ToString()},
+                new TestResponse {name="HttpStartTime", value=ValuesController.HttpStartTime.ToString()},
+                new TestResponse {name="HttpEndTime", value=ValuesController.HttpEndTime.ToString()}
 
             }));
             else if (req.Method.ToLower() == "delete")
             {
-                ValuesController.HttpPostTimer = 0;
-                ValuesController.HttpPostCounter = 0;
-                ValuesController.HttpPostStartTime = DateTime.MinValue;
-                ValuesController.HttpPostEndTime = DateTime.MinValue;
+                ValuesController.HttpTimer = 0;
+                ValuesController.HttpCounter = 0;
+                ValuesController.HttpStartTime = DateTime.MinValue;
+                ValuesController.HttpEndTime = DateTime.MinValue;
                 return await Task.FromResult(new JsonResult(new List<TestResponse>
                 {
-                    new TestResponse {name="HttpPostTimerMs", value=ValuesController.HttpPostTimer.ToString()},
-                    new TestResponse {name="HttpPostCounter", value=ValuesController.HttpPostCounter.ToString()},
-                    new TestResponse {name="HttpPostStartTime", value=ValuesController.HttpPostStartTime.ToString()},
-                    new TestResponse {name="HttpPostEndTime", value=ValuesController.HttpPostEndTime.ToString()}
+                    new TestResponse {name="HttpTimerMs", value=ValuesController.HttpTimer.ToString()},
+                    new TestResponse {name="HttpCounter", value=ValuesController.HttpCounter.ToString()},
+                    new TestResponse {name="HttpStartTime", value=ValuesController.HttpStartTime.ToString()},
+                    new TestResponse {name="HttpEndTime", value=ValuesController.HttpEndTime.ToString()}
 
                 }));
             }

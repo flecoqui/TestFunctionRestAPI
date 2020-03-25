@@ -13,14 +13,17 @@ The REST API (api/values) is actually an JSON echo service, if you send a Json s
 Below a curl command line to send the request:
 
 
-          curl -d '{"name":"0123456789"}' -H "Content-Type: application/json"  -X POST   https://<hostname>/api/values
+          curl -v -d "{'name':'0123456789'}" -H "Content-Type: application/json"  -X POST   https://<hostname>/api/values
+
+          curl -v -H "Content-Type: application/json"  -X GET https://<hostname>/api/values?name=0123456789
+
 
 
 Moreover, you can get some information about the performances of this service using another REST API (api/test).
 Below a curl command line to retrieve the performance counters:
 
 
-          curl  -H "Content-Type: application/json"  -X POST   https://<hostname>/api/test
+          curl  -H "Content-Type: application/json"  -X GET   https://<hostname>/api/test
 
 
 
@@ -35,8 +38,14 @@ This chapter describes how to deploy the rest API automatically on :</p>
 in **3 command lines**.
 
 ## PRE-REQUISITES
+
+### Azure Subscription
+
 First you need an Azure subscription.
 You can subscribe here:  https://azure.microsoft.com/en-us/free/ . </p>
+
+### Azure CLI
+
 Moreover, we will use Azure CLI v2.0 to deploy the resources in Azure.
 You can install Azure CLI on your machine running Linux, MacOS or Windows from here: https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest 
 
@@ -44,8 +53,97 @@ The first Azure CLI command will create a resource group.
 The second  Azure CLI command will deploy an Azure Function, an Azure App Service and a Virtual Machine using an Azure Resource Manager Template.
 In order to deploy Azure Container Instance or Azure Kubernetes Service a Service Principal is required to pull the container image from Azure Container Registry, unfortunately as today it's not possible to create Azure Service Principal with an Azure Resource Manager Template, we will use a PowerShell script on Windows or a Bash script on Linux to deploy the Azure Container Instance and  Azure Kubernetes Service.  
 
+### Kubectl
 
-## CREATE RESOURCE GROUP:
+Kubectl will be required to manager the Kubernetes cluster. Kubectl will be installed from Azure CLI.
+
+### HELM v3
+
+Helm v3 will be required for the AKS deployment
+You can download the binaries from there: https://github.com/helm/helm/releases
+
+### Azure Function Core Tools v3
+
+Azure Function Core Tools v3 will be used to create and deploy Azure Functions.
+All the instructions to install Azure Function Core Tool on Windows, Linux and MacOS here: https://docs.microsoft.com/en-us/azure/azure-functions/functions-run-local?tabs=windows%2Ccsharp%2Cbash
+
+### Docker and Docker Hub Account
+
+As the Azure Function Docker Image will be stored on Docker Hub, Docker must be installed on your machine with a Docker Hub Account.
+All the instructions to install Docker on Windows, Linux and MacOS here: https://docs.docker.com/install/
+All the instructions to create a Docker Hub Account here: https://hub.docker.com/ 
+
+### CURL
+
+Curl command line tool can be used to test your REST API hosted either locally, on Azure Function or on Azure Kubernetes Services.
+You can download curl for Windows, Linux and MacOS from there: https://curl.haxx.se/download.html
+
+### GIT
+
+Git command line tool can be used to clone locally this repository.
+You can download git for Windows, Linux and MacOS from there: https://git-scm.com/downloads
+
+
+## CLONING THE CURRENT REPOSITORY 
+
+First you need to copy the current repository on your machine.
+Run the following commands:
+
+1. Clone the current repository:
+
+        C:\git\me> git clone https://github.com/flecoqui/TestFunctionRestAPI.git
+
+
+
+2. Change directory :
+
+        C:\git\me> cd TestFunctionRestAPI
+        C:\git\me\TestFunctionRestAPI> 
+
+
+
+## DEPLOYING AND TESTING A FUNCTION REST API LOCALLY
+
+In order to test locally the function, you can use Azure Function core Tool to run the REST API locally.
+
+1. Change directory :
+
+        C:\git\me\TestFunctionRestAPI> cd TestFunctionApp
+
+2. Launch the function locally :
+
+        C:\git\me\TestFunctionRestAPI\TestFunctionApp> func start 
+
+3. After few seconds the functions should be launched locally exposing both REST API values and test
+
+        Http Functions:
+                test: [GET,DELETE] http://localhost:7071/api/test
+                values: [POST,GET] http://localhost:7071/api/values
+
+4. Open another Command Shell windows, and launch the following curl commands
+
+
+          curl -d "{'name':'0123456789'}" -H "Content-Type: application/json"  -X POST   http://localhost:7071/api/values
+
+          curl -H "Content-Type: application/json"  -X GET http://localhost:7071/api/values?name=0123456789
+
+          curl  -H "Content-Type: application/json"  -X GET   http://localhost:7071/api/test
+
+
+If the commands above do not return any strings, use the curl option -v to display the http Error Code:
+
+
+          curl -v -d "{'name':'0123456789'}" -H "Content-Type: application/json"  -X POST   http://localhost:7071/api/values
+
+          curl -v -H "Content-Type: application/json"  -X GET http://localhost:7071/api/values?name=0123456789
+
+          curl -v  -H "Content-Type: application/json"  -X GET   http://localhost:7071/api/test
+
+
+
+## DEPLOYING AND TESTING A FUNCTION REST API ON AZURE FUNCTION
+
+### CREATE RESOURCE GROUP:
 First you need to create the resource group which will be associated with this deployment. For this step, you can use Azure CLI v1 or v2.
 
 * **Azure CLI 1.0:** azure group create "ResourceGroupName" "RegionName"
@@ -58,7 +156,7 @@ For instance:
 
     az group create -n TestFunctionRestAPIrg -l eastus2
 
-## DEPLOY THE SERVICES:
+### DEPLOY THE SERVICES:
 
 ### DEPLOY REST API ON AZURE FUNCTION:
 You can deploy Azure Function, Azure App Service and Virtual Machine using ARM (Azure Resource Manager) Template and Azure CLI v1 or v2
@@ -82,6 +180,20 @@ When you deploy the service you can define the following parameters:</p>
 * **repoFunctionPath:** The path to the Azure Function code, by default "TestFunctionApp"</p>
 </p>
 
+## DEPLOYING AND TESTING A FUNCTION REST API ON AZURE KUBERNETES SERVICE WITH KEDA AND PROMETHEUS
+
+### CREATE RESOURCE GROUP:
+First you need to create the resource group which will be associated with this deployment. For this step, you can use Azure CLI v1 or v2.
+
+* **Azure CLI 1.0:** azure group create "ResourceGroupName" "RegionName"
+
+* **Azure CLI 2.0:** az group create an "ResourceGroupName" -l "RegionName"
+
+For instance:
+
+    azure group create TestFunctionRestAPIrg eastus2
+
+    az group create -n TestFunctionRestAPIrg -l eastus2
 
 ### DEPLOY REST API ON AZURE KUBERNETES SERVICE:
 

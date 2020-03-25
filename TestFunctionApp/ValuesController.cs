@@ -10,21 +10,21 @@ using Newtonsoft.Json;
 
 namespace TestFunctionApp
 {
-    public class HttpPostTimer : IDisposable
+    public class HttpTimer : IDisposable
     {
         DateTime start;
-        public HttpPostTimer()
+        public HttpTimer()
         {
             start = DateTime.Now;
-            if (ValuesController.HttpPostStartTime == DateTime.MinValue)
-                ValuesController.HttpPostStartTime = start;
+            if (ValuesController.HttpStartTime == DateTime.MinValue)
+                ValuesController.HttpStartTime = start;
         }
         public void Dispose()
         {
-            ValuesController.HttpPostEndTime = DateTime.Now;
-            TimeSpan ts = ValuesController.HttpPostEndTime - start;
-            ValuesController.HttpPostCounter++;
-            ValuesController.HttpPostTimer += ts.TotalMilliseconds;
+            ValuesController.HttpEndTime = DateTime.Now;
+            TimeSpan ts = ValuesController.HttpEndTime - start;
+            ValuesController.HttpCounter++;
+            ValuesController.HttpTimer += ts.TotalMilliseconds;
         }
 
     }
@@ -36,28 +36,48 @@ namespace TestFunctionApp
     };
     public static class ValuesController
     {
-        public static double HttpPostCounter;
-        public static double HttpPostTimer;
-        public static DateTime HttpPostStartTime = DateTime.MinValue;
-        public static DateTime HttpPostEndTime = DateTime.MinValue;
+        public static double HttpCounter;
+        public static double HttpTimer;
+        public static DateTime HttpStartTime = DateTime.MinValue;
+        public static DateTime HttpEndTime = DateTime.MinValue;
         [FunctionName("values")]
 
         public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post","get", Route = null)] HttpRequest req,
             ILogger log)
         {
-            //log.LogInformation("C# HTTP trigger function processed a request.");            
+            log.LogInformation("C# HTTP trigger function processed a request.");
+            string name = string.Empty;
 
-            string value = new StreamReader(req.Body).ReadToEnd();
-            dynamic inputdata = JsonConvert.DeserializeObject(value);
-
-            if (inputdata != null)
+            try
             {
-                using (HttpPostTimer hpt = new HttpPostTimer())
+                name = req.Query["name"];
+            }
+            catch(Exception)
+            {
+
+            }
+            if(string.IsNullOrEmpty(name))
+            {
+                try
+                {
+                    // Read body
+                    string value = new StreamReader(req.Body).ReadToEnd();
+                    dynamic inputdata = JsonConvert.DeserializeObject(value);
+                    name = name ?? inputdata?.name;
+                }
+                catch (Exception)
+                {
+
+                }
+            }
+            if (!string.IsNullOrEmpty(name))
+            {
+                using (HttpTimer hpt = new HttpTimer())
                 {
                     TestResponse t = new TestResponse();
                     t.name = "testResponse";
-                    t.value = inputdata.ToString();
+                    t.value = name.ToString();
                     return await Task.FromResult(new JsonResult(t));
                 }
             }

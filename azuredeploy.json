@@ -12,20 +12,15 @@
     },
     "azFunctionAppSku": {
       "type": "string",
-      "defaultValue": "F1",
+      "defaultValue": "S1",
       "allowedValues": [
-        "F1",
         "Y1",
-        "B1",
-        "B2",
-        "B3",
         "S1",
         "S2",
         "S3",
         "P1",
         "P2",
-        "P3",
-        "P4"
+        "P3"
       ],
       "metadata": {
         "description": "The SKU of the Azure Function you want to create."
@@ -47,7 +42,7 @@
     },
     "repoFunctionPath": {
       "type": "string",
-      "defaultValue": "TestFunctionApp",
+      "defaultValue": "TestFunctionAppv2",
       "metadata": {
         "description": "The path of the Azure Function code on github."
       }
@@ -57,6 +52,7 @@
     "location": "[resourceGroup().location]",
     "azFunctionPlanName": "[concat(parameters('namePrefix'), 'functplan')]",
     "azFunctionName": "[concat(parameters('namePrefix'), 'function')]",
+    "appInsightsName": "[concat(parameters('namePrefix'), 'appins')]",
     "replicaCount": "1",
     "partitionCount": "1",
     "hostingMode": "default",
@@ -65,11 +61,22 @@
 
     "storageAccountNamePrefix": "[toLower(substring(concat(parameters('namePrefix'), uniqueString(resourceGroup().id)), 0, 8))]",
     "storageAccountName": "[concat(variables('storageAccountNamePrefix'), uniqueString(concat(resourceGroup().id, variables('storageAccountNamePrefix'))),'sa')]",
-    "storageAccountType": "Standard_LRS",
+    "storageAccountType": "Standard_LRS"
 
 
   },
   "resources": [
+    {
+      "type": "microsoft.insights/components",
+      "apiVersion": "2015-05-01",
+      "name": "[variables('appInsightsName')]",
+      "location": "[resourceGroup().location]",
+      "kind": "web",
+      "properties": {
+        "Application_Type": "web",
+        "Request_Source": "IbizaWebAppExtensionCreate"
+      }
+    },
     {
       "type": "Microsoft.Storage/storageAccounts",
       "name": "[variables('storageAccountName')]",
@@ -79,22 +86,23 @@
         "accountType": "[variables('storageAccountType')]"
       }
     },
-
-
     {
       "type": "Microsoft.Web/serverfarms",
       "sku": {
         "name": "[toLower(parameters('azFunctionAppSku'))]",
         "capacity": 1
       },
-      "kind": "app",
+      "kind": "functionapp",
       "name": "[variables('azFunctionPlanName')]",
-      "apiVersion": "2016-09-01",
+      "apiVersion": "2018-02-01",
       "location": "[resourceGroup().location]",
       "properties": {
-        "name": "[variables('azFunctionPlanName')]",
         "perSiteScaling": false,
+        "maximumElasticWorkerCount": 1,
+        "isSpot": false,
         "reserved": false,
+        "isXenon": false,
+        "hyperV": false,
         "targetWorkerCount": 0,
         "targetWorkerSizeId": 0
       },
@@ -103,7 +111,7 @@
 
     {
       "type": "Microsoft.Web/sites",
-      "apiVersion": "2016-08-01",
+      "apiVersion": "2018-11-01",
       "name": "[variables('azFunctionName')]",
       "location": "[resourceGroup().location]",
       "dependsOn": [
@@ -130,7 +138,7 @@
           "appSettings": [
             {
               "name": "FUNCTIONS_EXTENSION_VERSION",
-              "value": "~3"
+              "value": "~2"
             },
             {
               "name": "FUNCTIONS_EXTENSION_RUNTIME",
@@ -143,37 +151,64 @@
           ]
         },
         "reserved": false,
+        "isXenon": false,
+        "hyperV": false,
         "scmSiteAlsoStopped": false,
-        "clientAffinityEnabled": false,
+        "clientAffinityEnabled": true,
         "clientCertEnabled": false,
         "hostNamesDisabled": false,
         "containerSize": 1536,
         "dailyMemoryTimeQuota": 0,
-        "httpsOnly": false
+        "httpsOnly": false,
+        "redundancyMode": "None"
       },
       "resources": [
         {
           "type": "config",
-          "apiVersion": "2016-08-01",
+          "apiVersion": "2018-11-01",
           "name": "web",
           "location": "[resourceGroup().location]",
           "dependsOn": [
             "[resourceId('Microsoft.Web/sites', variables('azFunctionName'))]"
           ],
           "properties": {
-            "numberOfWorkers": 1,
-            "netFrameworkVersion": "v4.6",
+            "numberOfWorkers": -1,
+            "defaultDocuments": [
+              "Default.htm",
+              "Default.html",
+              "Default.asp",
+              "index.htm",
+              "index.html",
+              "iisstart.htm",
+              "default.aspx",
+              "index.php"
+            ],
+            "netFrameworkVersion": "v4.0",
+            "phpVersion": "5.6",
             "requestTracingEnabled": false,
             "remoteDebuggingEnabled": false,
+            "remoteDebuggingVersion": "VS2019",
             "httpLoggingEnabled": false,
             "logsDirectorySizeLimit": 35,
-            "scmType": "None",
+            "detailedErrorLoggingEnabled": false,
+            "publishingUsername": "$testfunctionappcons",
+            "scmType": "ExternalGit",
             "use32BitWorkerProcess": true,
-            "alwaysOn": true,
-            "appCommandLine": "",
+            "webSocketsEnabled": false,
+            "alwaysOn": false,
             "managedPipelineMode": "Integrated",
+            "virtualApplications": [
+              {
+                "virtualPath": "/",
+                "physicalPath": "site\\wwwroot",
+                "preloadEnabled": false
+              }
+            ],
             "loadBalancing": "LeastRequests",
-            "siteAuthEnabled": false,
+            "experiments": {
+              "rampUpRules": []
+            },
+            "autoHealEnabled": false,
             "cors": {
               "allowedOrigins": [
                 "https://functions.azure.com",
@@ -182,6 +217,26 @@
               ],
               "supportCredentials": false
             },
+            "localMySqlEnabled": false,
+            "ipSecurityRestrictions": [
+              {
+                "ipAddress": "Any",
+                "action": "Allow",
+                "priority": 1,
+                "name": "Allow all",
+                "description": "Allow all access"
+              }
+            ],
+            "scmIpSecurityRestrictions": [
+              {
+                "ipAddress": "Any",
+                "action": "Allow",
+                "priority": 1,
+                "name": "Allow all",
+                "description": "Allow all access"
+              }
+            ],
+            "scmIpSecurityRestrictionsUseMain": false,
             "http20Enabled": false,
             "minTlsVersion": "1.2",
             "ftpsState": "AllAllowed",
@@ -209,7 +264,7 @@
   "outputs": {
     "curlCmdAzFunction1": {
       "type": "string",
-      "value": "[concat('curl -d \"{''name'':''0123456789''}\" -H \"Content-Type: application/json\"  -X POST   https://',variables('azFunctionName'),'.azurewebsites.net/api/values')]"
+      "value": "[concat('curl -d \"{name:0123456789}\" -H \"Content-Type: application/json\"  -X POST   https://',variables('azFunctionName'),'.azurewebsites.net/api/values')]"
     },
     "curlCmdAzFunction2": {
       "type": "string",

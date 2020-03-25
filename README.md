@@ -57,7 +57,7 @@ In order to deploy Azure Container Instance or Azure Kubernetes Service a Servic
 
 Kubectl will be required to manager the Kubernetes cluster. Kubectl will be installed from Azure CLI.
 
-### HELM v3
+### Helm v3
 
 Helm v3 will be required for the AKS deployment
 You can download the binaries from there: https://github.com/helm/helm/releases
@@ -73,12 +73,12 @@ As the Azure Function Docker Image will be stored on Docker Hub, Docker must be 
 All the instructions to install Docker on Windows, Linux and MacOS here: https://docs.docker.com/install/
 All the instructions to create a Docker Hub Account here: https://hub.docker.com/ 
 
-### CURL
+### Curl
 
 Curl command line tool can be used to test your REST API hosted either locally, on Azure Function or on Azure Kubernetes Services.
 You can download curl for Windows, Linux and MacOS from there: https://curl.haxx.se/download.html
 
-### GIT
+### Git
 
 Git command line tool can be used to clone locally this repository.
 You can download git for Windows, Linux and MacOS from there: https://git-scm.com/downloads
@@ -161,7 +161,7 @@ For instance:
 ### DEPLOY REST API ON AZURE FUNCTION:
 You can deploy Azure Function, Azure App Service and Virtual Machine using ARM (Azure Resource Manager) Template and Azure CLI v1 or v2
 
-* **Azure CLI 1.0:** azure group deployment create "ResourceGroupName" "DeploymentName"  -f azuredeploy.json -e azuredeploy.parameters.json*
+* **Azure CLI 1.0:** azure group deployment create "ResourceGroupName" "DeploymentName"  -f azuredeploy.json -e azuredeploy.parameters.json
 
 * **Azure CLI 2.0:** az group deployment create -g "ResourceGroupName" -n "DeploymentName" --template-file "templatefile.json" --parameters @"templatefile.parameter..json"  --verbose -o json
 

@@ -3,10 +3,10 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "namePrefix": {
-      "value": "testrest"
+      "value": "testfunctionrest"
     },
     "azFunctionAppSku": {
-      "value": "P2"
+      "value": "Y1"
     },
     "repoURL": {
       "value": "https://github.com/flecoqui/TestFunctionRestAPI.git"

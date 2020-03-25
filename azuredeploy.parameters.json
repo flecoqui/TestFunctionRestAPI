@@ -8,29 +8,14 @@
     "azFunctionAppSku": {
       "value": "P2"
     },
-    "webAppSku": {
-      "value": "P2"
-    },
     "repoURL": {
-      "value": "https://github.com/flecoqui/TestRESTAPIServices.git"
+      "value": "https://github.com/flecoqui/TestFunctionRestAPI.git"
     },
     "repoBranch": {
       "value": "master"
     },
     "repoFunctionPath": {
       "value": "TestFunctionApp"
-    },
-    "vmAdminUsername": {
-      "value": "VMAdmin"
-    },
-    "vmAdminPassword": {
-      "value": "VMP@ssw0rd"
-    },
-    "vmOS": {
-      "value": "debian"
-    },
-    "vmSize": {
-      "value": "Small"
     }
   }
 }

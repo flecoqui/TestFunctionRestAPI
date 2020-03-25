@@ -10,27 +10,6 @@
         "description": "Service name prefix must only contain lowercase letters, digits or dashes, cannot use dash as the first two or last one characters, cannot contain consecutive dashes, and is limited between 2 and 50 characters in length."
       }
     },
-    "webAppSku": {
-      "type": "string",
-      "defaultValue": "F1",
-      "allowedValues": [
-        "F1",
-        "Y1",
-        "B1",
-        "B2",
-        "B3",
-        "S1",
-        "S2",
-        "S3",
-        "P1",
-        "P2",
-        "P3",
-        "P4"
-      ],
-      "metadata": {
-        "description": "The SKU of the Web service you want to create."
-      }
-    },
     "azFunctionAppSku": {
       "type": "string",
       "defaultValue": "F1",
@@ -54,7 +33,7 @@
     },
     "repoURL": {
       "type": "string",
-      "defaultValue": "https://github.com/flecoqui/TestRESTAPIServices.git",
+      "defaultValue": "https://github.com/flecoqui/TestFunctionRestAPI.git",
       "metadata": {
         "description": "The URL for the GitHub repository that contains the project to deploy."
       }
@@ -72,186 +51,23 @@
       "metadata": {
         "description": "The path of the Azure Function code on github."
       }
-    },
-    "vmAdminUsername": {
-      "type": "string",
-      "metadata": {
-        "description": "User name for the Virtual Machine."
-      }
-    },
-    "vmAdminPassword": {
-      "type": "securestring",
-      "metadata": {
-        "description": "Password for the Virtual Machine."
-      }
-    },
-    "vmOS": {
-      "type": "string",
-      "defaultValue": "debian",
-      "allowedValues": [
-        "debian",
-        "ubuntu",
-        "centos",
-        "redhat",
-        "windowsserver2016"
-      ],
-      "metadata": {
-        "description": "The Operating System to be installed on the VM. Default value debian. Allowed values: debian,ubuntu,centos,redhat,nanoserver2016,windowsserver2016"
-      }
-    },
-    "vmSize": {
-      "type": "string",
-      "defaultValue": "Small",
-      "allowedValues": [
-        "Small",
-        "Medium",
-        "Large",
-        "XLarge"
-      ],
-      "metadata": {
-        "description": "Configuration Size: VM Size + Disk Size"
-      }
     }
   },
   "variables": {
     "location": "[resourceGroup().location]",
     "azFunctionPlanName": "[concat(parameters('namePrefix'), 'functplan')]",
     "azFunctionName": "[concat(parameters('namePrefix'), 'function')]",
-    "appServicePlanName": "[concat(parameters('namePrefix'), 'webplan')]",
-    "webAppName": "[concat(parameters('namePrefix'), 'web')]",
-    "vmName": "[concat(parameters('namePrefix'), 'vm')]",
-    "vmSize": "[variables('configurationSize').vmSize]",
-    "vmDataDiskSize": "[variables('configurationSize').diskSize]",
     "replicaCount": "1",
     "partitionCount": "1",
     "hostingMode": "default",
-    "configurationSizeSmall": {
-      "vmSize": "Standard_D2s_v3",
-      "diskSize": "128"
-    },
-    "configurationSizeMedium": {
-      "vmSize": "Standard_D4s_v3",
-      "diskSize": "256"
-    },
-    "configurationSizeLarge": {
-      "vmSize": "Standard_D8s_v3",
-      "diskSize": "512"
-    },
-    "configurationSizeXLarge": {
-      "vmSize": "Standard_D16s_v3",
-      "diskSize": "1024"
-    },
-    "configurationOS": {
-      "debian": {
-        "publisher": "credativ",
-        "offer": "Debian",
-        "sku": "9",
-        "version": "latest",
-        "installScriptUrl": "https://raw.githubusercontent.com/flecoqui/TestRESTAPIServices/master/install-software.sh",
-        "installScriptFileName": "install-software.sh",
-        "commandToExecute": "[concat('sh install-software.sh \"',  variables('vmName'), '.', resourceGroup().location, '.cloudapp.azure.com','\"')]",
-        "extensionPublisher": "Microsoft.Azure.Extensions",
-        "extensionType": "CustomScript",
-        "extensionTypeHandlerVersion": "2.0",
-        "remoteCommand": "[concat('ssh ', parameters('vmAdminUsername'), '@', variables('vmName'), '.', resourceGroup().location, '.cloudapp.azure.com')]",
-        "logInformation": "sudo cat /var/lib/waagent/custom-script/download/0/stdout",
-        "httpUrl": "[concat('http://', variables('vmName'), '.', resourceGroup().location, '.cloudapp.azure.com/api/values')]"
-      },
-      "ubuntu": {
-        "publisher": "Canonical",
-        "offer": "UbuntuServer",
-        "sku": "18.04-LTS",
-        "version": "latest",
-        "installScriptUrl": "https://raw.githubusercontent.com/flecoqui/TestRESTAPIServices/master/install-software.sh",
-        "installScriptFileName": "install-software.sh",
-        "commandToExecute": "[concat('sh install-software.sh \"',  variables('vmName'), '.', resourceGroup().location, '.cloudapp.azure.com','\"')]",
-        "extensionPublisher": "Microsoft.Azure.Extensions",
-        "extensionType": "CustomScript",
-        "extensionTypeHandlerVersion": "2.0",
-        "remoteCommand": "[concat('ssh ', parameters('vmAdminUsername'), '@', variables('vmName'), '.', resourceGroup().location, '.cloudapp.azure.com')]",
-        "logInformation": "sudo cat /var/lib/waagent/custom-script/download/0/stdout",
-        "httpUrl": "[concat('http://', variables('vmName'), '.', resourceGroup().location, '.cloudapp.azure.com/api/values')]"
-      },
-      "centos": {
-        "publisher": "openlogic",
-        "offer": "centos",
-        "sku": "7.5",
-        "version": "latest",
-        "installScriptUrl": "https://raw.githubusercontent.com/flecoqui/TestRESTAPIServices/master/install-software.sh",
-        "installScriptFileName": "install-software.sh",
-        "commandToExecute": "[concat('sh install-software.sh \"',  variables('vmName'), '.', resourceGroup().location, '.cloudapp.azure.com','\"')]",
-        "extensionPublisher": "Microsoft.Azure.Extensions",
-        "extensionType": "CustomScript",
-        "extensionTypeHandlerVersion": "2.0",
-        "remoteCommand": "[concat('ssh ', parameters('vmAdminUsername'), '@', variables('vmName'), '.', resourceGroup().location, '.cloudapp.azure.com')]",
-        "logInformation": "sudo cat /var/lib/waagent/custom-script/download/0/stdout",
-        "httpUrl": "[concat('http://', variables('vmName'), '.', resourceGroup().location, '.cloudapp.azure.com/api/values')]"
-      },
-      "redhat": {
-        "publisher": "RedHat",
-        "offer": "RHEL",
-        "sku": "7.2",
-        "version": "latest",
-        "installScriptUrl": "https://raw.githubusercontent.com/flecoqui/TestRESTAPIServices/master/install-software.sh",
-        "installScriptFileName": "install-software.sh",
-        "commandToExecute": "[concat('sh install-software.sh \"',  variables('vmName'), '.', resourceGroup().location, '.cloudapp.azure.com','\"')]",
-        "extensionPublisher": "Microsoft.Azure.Extensions",
-        "extensionType": "CustomScript",
-        "extensionTypeHandlerVersion": "2.0",
-        "remoteCommand": "[concat('ssh ', parameters('vmAdminUsername'), '@', variables('vmName'), '.', resourceGroup().location, '.cloudapp.azure.com')]",
-        "logInformation": "sudo cat /var/lib/waagent/custom-script/download/0/stdout",
-        "httpUrl": "[concat('http://', variables('vmName'), '.', resourceGroup().location, '.cloudapp.azure.com/api/values')]"
-      },
-      "windowsserver2016": {
-        "publisher": "MicrosoftWindowsServer",
-        "offer": "WindowsServer",
-        "sku": "2016-Datacenter",
-        "version": "latest",
-        "installScriptUrl": "https://raw.githubusercontent.com/flecoqui/TestRESTAPIServices/master/install-software-windows.ps1",
-        "installScriptFileName": "install-software-windows.ps1",
-        "commandToExecute": "[concat('powershell.exe -ExecutionPolicy Unrestricted -File install-software-windows.ps1 \"',  variables('vmName'), '.', resourceGroup().location, '.cloudapp.azure.com','\"' )]",
-        "extensionPublisher": "Microsoft.Compute",
-        "extensionType": "CustomScriptExtension",
-        "extensionTypeHandlerVersion": "1.7",
-        "remoteCommand": "[concat('mstsc /admin /v:', variables('vmName'), '.', resourceGroup().location, '.cloudapp.azure.com')]",
-        "logInformation": "type c:\\testrest\\log\\install.log",
-        "httpUrl": "[concat('http://', variables('vmName'), '.', resourceGroup().location, '.cloudapp.azure.com')]"
-      },
-      "nanoserver2016": {
-        "publisher": "MicrosoftWindowsServer",
-        "offer": "WindowsServer",
-        "sku": "2016-Nano-Server",
-        "version": "latest",
-        "installScriptUrl": "https://raw.githubusercontent.com/flecoqui/TestRESTAPIServices/master/install-software-windows.ps1",
-        "installScriptFileName": "install-software-windows.ps1",
-        "commandToExecute": "[concat('powershell.exe -ExecutionPolicy Unrestricted -File install-software-windows.ps1 \"',  variables('vmName'), '.', resourceGroup().location, '.cloudapp.azure.com','\"' )]",
-        "extensionPublisher": "Microsoft.Compute",
-        "extensionType": "CustomScriptExtension",
-        "extensionTypeHandlerVersion": "1.7",
-        "remoteCommand": "[concat('Set-Item WSMan:\\localhost\\Client\\TrustedHosts ', variables('vmName'), '.', resourceGroup().location, '.cloudapp.azure.com',' Enter-PSSession -ComputerName  \"', variables('vmName'), '.', resourceGroup().location, '.cloudapp.azure.com', '\"  -Credential ', parameters('vmAdminUsername') )]",
-        "logInformation": "type c:\\source\\install.log",
-        "httpUrl": "[concat('http://', variables('vmName'), '.', resourceGroup().location, '.cloudapp.azure.com')]"
-      }
-    },
-    "configurationSize": "[variables(concat('configurationSize', parameters('vmSize')))]",
+
     "apiVersion": "2015-06-15",
+
     "storageAccountNamePrefix": "[toLower(substring(concat(parameters('namePrefix'), uniqueString(resourceGroup().id)), 0, 8))]",
     "storageAccountName": "[concat(variables('storageAccountNamePrefix'), uniqueString(concat(resourceGroup().id, variables('storageAccountNamePrefix'))),'sa')]",
     "storageAccountType": "Standard_LRS",
-    "vmStorageAccountContainerName": "vhds",
-    "OSDiskName": "osdisksimplevm",
-    "dataDisk1VhdName": "[concat(parameters('namePrefix'), 'datadisk')]",
-    "networkSecurityGroupName": "[concat(parameters('namePrefix'), 'nsg')]",
 
-    "nicName": "[concat(parameters('namePrefix'), 'nic')]",
-    "addressPrefix": "10.0.0.0/16",
-    "subnetName": "[concat(parameters('namePrefix'), 'subnet')]",
-    "subnetPrefix": "10.0.0.0/24",
-    "publicIPAddressName": "[concat(parameters('namePrefix'), 'ip')]",
-    "publicIPAddressType": "Dynamic",
-    "virtualNetworkName": "[concat(parameters('namePrefix'), 'vnet')]",
-    "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
-    "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]"
+
   },
   "resources": [
     {
@@ -262,265 +78,6 @@
       "properties": {
         "accountType": "[variables('storageAccountType')]"
       }
-    },
-    {
-      "apiVersion": "[variables('apiVersion')]",
-      "type": "Microsoft.Network/networkSecurityGroups",
-      "name": "[variables('networkSecurityGroupName')]",
-      "location": "[resourceGroup().location]",
-      "properties": {
-        "securityRules": [
-          {
-            "name": "ssh",
-            "properties": {
-              "description": "SSH port",
-              "protocol": "Tcp",
-              "sourcePortRange": "*",
-              "destinationPortRange": "22",
-              "sourceAddressPrefix": "Internet",
-              "destinationAddressPrefix": "*",
-              "access": "Allow",
-              "priority": 100,
-              "direction": "Inbound"
-            }
-          },
-          {
-            "name": "rdp",
-            "properties": {
-              "description": "RDP port",
-              "protocol": "Tcp",
-              "sourcePortRange": "*",
-              "destinationPortRange": "3389",
-              "sourceAddressPrefix": "Internet",
-              "destinationAddressPrefix": "*",
-              "access": "Allow",
-              "priority": 101,
-              "direction": "Inbound"
-            }
-          },
-          {
-            "name": "winrm1",
-            "properties": {
-              "description": "WINRM1 port",
-              "protocol": "Tcp",
-              "sourcePortRange": "*",
-              "destinationPortRange": "5985",
-              "sourceAddressPrefix": "Internet",
-              "destinationAddressPrefix": "*",
-              "access": "Allow",
-              "priority": 102,
-              "direction": "Inbound"
-            }
-          },
-          {
-            "name": "winrm2",
-            "properties": {
-              "description": "WINRM2 port",
-              "protocol": "Tcp",
-              "sourcePortRange": "*",
-              "destinationPortRange": "5986",
-              "sourceAddressPrefix": "Internet",
-              "destinationAddressPrefix": "*",
-              "access": "Allow",
-              "priority": 103,
-              "direction": "Inbound"
-            }
-          },
-          {
-            "name": "http",
-            "properties": {
-              "description": "http server port",
-              "protocol": "Tcp",
-              "sourcePortRange": "*",
-              "destinationPortRange": "80",
-              "sourceAddressPrefix": "Internet",
-              "destinationAddressPrefix": "*",
-              "access": "Allow",
-              "priority": 104,
-              "direction": "Inbound"
-            }
-          },
-          {
-            "name": "iperf3-udp",
-            "properties": {
-              "description": "iperf3 udp port",
-              "protocol": "Udp",
-              "sourcePortRange": "*",
-              "destinationPortRange": "5201",
-              "sourceAddressPrefix": "Internet",
-              "destinationAddressPrefix": "*",
-              "access": "Allow",
-              "priority": 110,
-              "direction": "Inbound"
-            }
-          },
-          {
-            "name": "iperf3-tcp",
-            "properties": {
-              "description": "iperf3 tcp port",
-              "protocol": "Tcp",
-              "sourcePortRange": "*",
-              "destinationPortRange": "5201",
-              "sourceAddressPrefix": "Internet",
-              "destinationAddressPrefix": "*",
-              "access": "Allow",
-              "priority": 111,
-              "direction": "Inbound"
-            }
-          }
-        ]
-      }
-    },
-    {
-      "apiVersion": "[variables('apiVersion')]",
-      "type": "Microsoft.Network/publicIPAddresses",
-      "name": "[variables('publicIPAddressName')]",
-      "location": "[resourceGroup().location]",
-      "properties": {
-        "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
-        "dnsSettings": {
-          "domainNameLabel": "[variables('vmName')]"
-        }
-      }
-    },
-    {
-      "apiVersion": "[variables('apiVersion')]",
-      "type": "Microsoft.Network/virtualNetworks",
-      "name": "[variables('virtualNetworkName')]",
-      "location": "[resourceGroup().location]",
-      "dependsOn": [
-        "[concat('Microsoft.Network/networkSecurityGroups/', variables('networkSecurityGroupName'))]"
-      ],
-      "properties": {
-        "addressSpace": {
-          "addressPrefixes": [
-            "[variables('addressPrefix')]"
-          ]
-        },
-        "subnets": [
-          {
-            "name": "[variables('subnetName')]",
-            "properties": {
-              "addressPrefix": "[variables('subnetPrefix')]",
-              "networkSecurityGroup": {
-                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
-              }
-            }
-          }
-        ]
-      }
-    },
-    {
-      "apiVersion": "[variables('apiVersion')]",
-      "type": "Microsoft.Network/networkInterfaces",
-      "name": "[variables('nicName')]",
-      "location": "[resourceGroup().location]",
-      "dependsOn": [
-        "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]",
-        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
-      ],
-      "properties": {
-        "ipConfigurations": [
-          {
-            "name": "ipconfig1",
-            "properties": {
-              "privateIPAllocationMethod": "Dynamic",
-              "publicIPAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
-              },
-              "subnet": {
-                "id": "[variables('subnetRef')]"
-              }
-            }
-          }
-        ]
-      }
-    },
-    {
-      "apiVersion": "[variables('apiVersion')]",
-      "type": "Microsoft.Compute/virtualMachines",
-      "name": "[variables('vmName')]",
-      "location": "[resourceGroup().location]",
-      "dependsOn": [
-        "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
-        "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
-      ],
-      "properties": {
-        "hardwareProfile": {
-          "vmSize": "[variables('vmSize')]"
-        },
-        "osProfile": {
-          "computerName": "[variables('vmName')]",
-          "adminUsername": "[parameters('vmAdminUsername')]",
-          "adminPassword": "[parameters('vmAdminPassword')]"
-        },
-        "storageProfile": {
-          "imageReference": {
-            "publisher": "[variables('configurationOS')[parameters('vmOS')].publisher]",
-            "offer": "[variables('configurationOS')[parameters('vmOS')].offer]",
-            "sku": "[variables('configurationOS')[parameters('vmOS')].sku]",
-            "version": "[variables('configurationOS')[parameters('vmOS')].version]"
-          },
-          "osDisk": {
-            "name": "osdisk",
-            "vhd": {
-              "uri": "[concat('http://',variables('storageAccountName'),'.blob.core.windows.net/',variables('vmStorageAccountContainerName'),'/',variables('OSDiskName'),'.vhd')]"
-            },
-            "caching": "ReadWrite",
-            "createOption": "FromImage"
-          },
-          "dataDisks": [
-            {
-              "name": "datadisk1",
-              "diskSizeGB": "[variables('vmDataDiskSize')]",
-              "lun": 0,
-              "vhd": {
-                "uri": "[concat('http://',variables('storageAccountName'),'.blob.core.windows.net/',variables('vmStorageAccountContainerName'),'/',variables('dataDisk1VhdName'),'.vhd')]"
-              },
-              "createOption": "Empty"
-            }
-          ]
-        },
-        "networkProfile": {
-          "networkInterfaces": [
-            {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicName'))]"
-            }
-          ]
-        },
-        "diagnosticsProfile": {
-          "bootDiagnostics": {
-            "enabled": "true",
-            "storageUri": "[concat('http://',variables('storageAccountName'),'.blob.core.windows.net')]"
-          }
-        }
-      },
-      "resources": [
-        {
-          "name": "init",
-          "type": "extensions",
-          "location": "[resourceGroup().location]",
-          "apiVersion": "2015-06-15",
-          "dependsOn": [
-            "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
-          ],
-          "tags": {
-            "displayName": "init"
-          },
-          "properties": {
-            "publisher": "[variables('configurationOS')[parameters('vmOS')].extensionPublisher]",
-            "type": "[variables('configurationOS')[parameters('vmOS')].extensionType]",
-            "typeHandlerVersion": "[variables('configurationOS')[parameters('vmOS')].extensionTypeHandlerVersion]",
-            "autoUpgradeMinorVersion": true,
-            "settings": {
-              "fileUris": [
-                "[variables('configurationOS')[parameters('vmOS')].installScriptUrl]"
-              ],
-              "commandToExecute": "[variables('configurationOS')[parameters('vmOS')].commandToExecute]"
-            }
-          }
-        }
-      ]
     },
 
 
@@ -573,7 +130,7 @@
           "appSettings": [
             {
               "name": "FUNCTIONS_EXTENSION_VERSION",
-              "value": "~2"
+              "value": "~3"
             },
             {
               "name": "FUNCTIONS_EXTENSION_RUNTIME",
@@ -647,231 +204,20 @@
         }
       ]
 
-    },
-    {
-      "type": "Microsoft.Web/serverfarms",
-      "sku": {
-        "name": "[toLower(parameters('webAppSku'))]",
-        "capacity": 1
-      },
-      "kind": "app",
-      "name": "[variables('appServicePlanName')]",
-      "apiVersion": "2016-09-01",
-      "location": "[resourceGroup().location]",
-      "properties": {
-        "name": "[variables('appServicePlanName')]",
-        "perSiteScaling": false,
-        "reserved": false,
-        "targetWorkerCount": 0,
-        "targetWorkerSizeId": 0
-      },
-      "dependsOn": []
-    },
-
-    {
-      "type": "Microsoft.Web/sites",
-      "kind": "WebApp",
-      "name": "[variables('webAppName')]",
-      "apiVersion": "2016-03-01",
-      "location": "[resourceGroup().location]",
-      "properties": {
-        "name": "[variables('webAppName')]",
-        "hostNames": [
-          "[concat(variables('webAppName'),'.azurewebsites.net')]"
-        ],
-        "enabledHostNames": [
-          "[concat(variables('webAppName'),'.azurewebsites.net')]",
-          "[concat(variables('webAppName'),'.scm.azurewebsites.net')]"
-        ],
-        "hostNameSslStates": [
-          {
-            "name": "[concat(variables('webAppName'),'.azurewebsites.net')]",
-            "sslState": 0,
-            "thumbprint": null,
-            "ipBasedSslState": 0
-          },
-          {
-            "name": "[concat(variables('webAppName'),'.scm.azurewebsites.net')]",
-            "sslState": 0,
-            "thumbprint": null,
-            "ipBasedSslState": 0
-          }
-        ],
-        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]"
-      },
-      "resources": [
-        {
-          "type": "config",
-          "apiVersion": "2016-08-01",
-          "name": "web",
-          "location": "[resourceGroup().location]",
-          "dependsOn": [
-            "[resourceId('Microsoft.Web/sites', variables('webAppName'))]"
-          ],
-          "properties": {
-            "numberOfWorkers": 1,
-            "defaultDocuments": [
-              "Default.htm",
-              "Default.html",
-              "Default.asp",
-              "index.htm",
-              "index.html",
-              "iisstart.htm",
-              "default.aspx",
-              "index.php",
-              "hostingstart.html"
-            ],
-            "netFrameworkVersion": "v4.6",
-            "phpVersion": "5.6",
-            "requestTracingEnabled": false,
-            "remoteDebuggingEnabled": false,
-            "httpLoggingEnabled": false,
-            "logsDirectorySizeLimit": 35,
-            "detailedErrorLoggingEnabled": false,
-            "use32BitWorkerProcess": true,
-            "webSocketsEnabled": false,
-            "alwaysOn": true,
-            "managedPipelineMode": "Integrated",
-            "loadBalancing": "LeastRequests",
-            "siteAuthEnabled": false,
-            "http20Enabled": false,
-            "minTlsVersion": "1.2",
-            "ftpsState": "AllAllowed",
-            "reservedInstanceCount": 0
-          }
-        },
-        {
-          "apiVersion": "2016-08-01",
-          "name": "web",
-          "type": "sourcecontrols",
-          "dependsOn": [
-            "[resourceId('Microsoft.Web/Sites', variables('webAppName'))]",
-            "[concat('Microsoft.Web/Sites/', variables('webAppName'),'/config/web')]"
-          ],
-          "properties": {
-            "RepoUrl": "[parameters('repoURL')]",
-            "branch": "[parameters('repoBranch')]",
-            "IsManualIntegration": true
-          }
-        }
-      ],
-      "dependsOn": [
-        "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]"
-      ]
-    },
-
-
- 
-    {
-      "apiVersion": "2015-04-01",
-      "name": "[concat('ServerErrors ', variables('webAppName'))]",
-      "type": "Microsoft.Insights/alertrules",
-      "location": "[resourceGroup().location]",
-      "dependsOn": [
-        "[variables('webAppName')]"
-      ],
-      "tags": {
-        "[concat('hidden-link:', resourceId('Microsoft.Web/sites', variables('webAppName')))]": "Resource",
-        "displayName": "ServerErrorsAlertRule"
-      },
-      "properties": {
-        "name": "[concat('ServerErrors ', variables('webAppName'))]",
-        "description": "[concat(variables('webAppName'), ' has some server errors, status code 5xx.')]",
-        "isEnabled": false,
-        "condition": {
-          "odata.type": "Microsoft.Azure.Management.Insights.Models.ThresholdRuleCondition",
-          "dataSource": {
-            "odata.type": "Microsoft.Azure.Management.Insights.Models.RuleMetricDataSource",
-            "resourceUri": "[resourceId('Microsoft.Web/sites', variables('webAppName'))]",
-            "metricName": "Http5xx"
-          },
-          "operator": "GreaterThan",
-          "threshold": 0.0,
-          "windowSize": "PT5M"
-        },
-        "action": {
-          "odata.type": "Microsoft.Azure.Management.Insights.Models.RuleEmailAction",
-          "sendToServiceOwners": true,
-          "customEmails": []
-        }
-      }
-    },
-    {
-      "apiVersion": "2015-04-01",
-      "name": "[concat('ForbiddenRequests ', variables('webAppName'))]",
-      "type": "Microsoft.Insights/alertrules",
-      "location": "[resourceGroup().location]",
-      "dependsOn": [
-        "[variables('webAppName')]"
-      ],
-      "tags": {
-        "[concat('hidden-link:', resourceId('Microsoft.Web/sites', variables('webAppName')))]": "Resource",
-        "displayName": "ForbiddenRequestsAlertRule"
-      },
-      "properties": {
-        "name": "[concat('ForbiddenRequests ', variables('webAppName'))]",
-        "description": "[concat(variables('webAppName'), ' has some requests that are forbidden, status code 403.')]",
-        "isEnabled": false,
-        "condition": {
-          "odata.type": "Microsoft.Azure.Management.Insights.Models.ThresholdRuleCondition",
-          "dataSource": {
-            "odata.type": "Microsoft.Azure.Management.Insights.Models.RuleMetricDataSource",
-            "resourceUri": "[resourceId('Microsoft.Web/sites', variables('webAppName'))]",
-            "metricName": "Http403"
-          },
-          "operator": "GreaterThan",
-          "threshold": 0,
-          "windowSize": "PT5M"
-        },
-        "action": {
-          "odata.type": "Microsoft.Azure.Management.Insights.Models.RuleEmailAction",
-          "sendToServiceOwners": true,
-          "customEmails": []
-        }
-      }
-    },
-
-    {
-      "apiVersion": "2015-05-01",
-      "name": "[concat('AppInsights', variables('webAppName'))]",
-      "type": "Microsoft.Insights/components",
-      "location": "[resourceGroup().location]",
-      "dependsOn": [
-        "[variables('webAppName')]"
-      ],
-      "tags": {
-        "[concat('hidden-link:', resourceId('Microsoft.Web/sites', variables('webAppName')))]": "Resource",
-        "displayName": "AppInsightsComponent"
-      },
-      "properties": {
-        "ApplicationId": "[variables('webAppName')]"
-      }
     }
   ],
   "outputs": {
-    "curlCmdAzWeb1": {
-      "type": "string",
-      "value": "[concat('curl -d ''{\"name\":\"0123456789\"}'' -H \"Content-Type: application/json\"  -X POST   https://',variables('webAppName'),'.azurewebsites.net/api/values')]"
-    },
-    "curlCmdAzWeb2": {
-      "type": "string",
-      "value": "[concat('curl -H \"Content-Type: application/json\"  -X GET   https://',variables('webAppName'),'.azurewebsites.net/api/test')]"
-    },
     "curlCmdAzFunction1": {
       "type": "string",
-      "value": "[concat('curl -d ''{\"name\":\"0123456789\"}'' -H \"Content-Type: application/json\"  -X POST   https://',variables('azFunctionName'),'.azurewebsites.net/api/values')]"
+      "value": "[concat('curl -d \"{''name'':''0123456789''}\" -H \"Content-Type: application/json\"  -X POST   https://',variables('azFunctionName'),'.azurewebsites.net/api/values')]"
     },
     "curlCmdAzFunction2": {
       "type": "string",
+      "value": "[concat('curl   -X GET   https://',variables('azFunctionName'),'.azurewebsites.net/api/values?name=0123456789')]"
+    },
+    "curlCmdAzFunction3": {
+      "type": "string",
       "value": "[concat('curl -H \"Content-Type: application/json\"  -X GET   https://',variables('azFunctionName'),'.azurewebsites.net/api/test')]"
-    },
-    "curlCmdVM1": {
-      "type": "string",
-      "value": "[concat('curl -d ''{\"name\":\"0123456789\"}'' -H \"Content-Type: application/json\"  -X POST   http://',variables('vmName'),'.', resourceGroup().location, '.cloudapp.azure.com/api/values')]"
-    },
-    "curlCmdVM2": {
-      "type": "string",
-      "value": "[concat('curl -H \"Content-Type: application/json\"  -X GET   http://',variables('vmName'),'.', resourceGroup().location, '.cloudapp.azure.com/api/test')]"
     }
   }
 }

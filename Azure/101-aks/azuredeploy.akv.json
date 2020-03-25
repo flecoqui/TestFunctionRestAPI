@@ -1,0 +1,152 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "namePrefix": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 50,
+      "metadata": {
+        "description": "Service name prefix must only contain lowercase letters, digits or dashes, cannot use dash as the first two or last one characters, cannot contain consecutive dashes, and is limited between 2 and 50 characters in length."
+      }
+    },    
+    "objectId": {
+      "type": "securestring",
+      "defaultValue": "44b29aa9-ccd0-4314-aaa0-fd4df282b906",
+      "metadata": {
+        "description": "Object Id of ACR service principal"
+      }
+    },
+    "appId": {
+      "type": "securestring",
+      "defaultValue": "44b29aa9-ccd0-4314-aaa0-fd4df282b906",
+      "metadata": {
+        "description": "AppId associated with the ACR service principal"
+      }
+    },
+    "password": {
+      "type": "securestring",
+      "defaultValue": "44b29aa9-ccd0-4314-aaa0-fd4df282b906",
+      "metadata": {
+        "description": "Password associated with the ACR service principal"
+      }
+    }
+  },
+  "variables": {
+    "location": "[resourceGroup().location]",
+    "keyVaultName": "[concat(parameters('namePrefix'), 'akv')]",
+    "containerRegistryName": "[concat(parameters('namePrefix'), 'acr')]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.KeyVault/vaults",
+      "apiVersion": "2016-10-01",
+      "name": "[variables('keyVaultName')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "sku": {
+          "family": "A",
+          "name": "standard"
+        },
+        "tenantId": "[subscription().tenantId]",
+        "accessPolicies": [
+          {
+            
+            "tenantId": "[subscription().tenantId]",
+            "objectId": "[parameters('objectId')]",
+            "permissions": {
+              "keys": [
+                "get",
+                "create",
+                "delete",
+                "list",
+                "update",
+                "import",
+                "backup",
+                "restore",
+                "recover"
+            ],
+            "secrets": [
+                "get",
+                "list",
+                "set",
+                "delete",
+                "backup",
+                "restore",
+                "recover"
+            ],
+            "certificates": [
+                "get",
+                "list",
+                "delete",
+                "create",
+                "import",
+                "update",
+                "managecontacts",
+                "getissuers",
+                "listissuers",
+                "setissuers",
+                "deleteissuers",
+                "manageissuers",
+                "recover"
+            ],
+            "storage": [
+                "get",
+                "list",
+                "delete",
+                "set",
+                "update",
+                "regeneratekey",
+                "setsas",
+                "listsas",
+                "getsas",
+                "deletesas"
+            ]
+            }
+          }
+        ],
+        "enabledForDeployment": false
+      }
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2016-10-01",
+      "name": "[concat(variables('keyVaultName'), '/', variables('containerRegistryName'), '-pull-pwd')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
+      ],
+      "properties": {
+        "value": "[parameters('password')]",
+        "attributes": {
+          "enabled": true
+      }
+      }
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2016-10-01",
+      "name": "[concat(variables('keyVaultName'), '/', variables('containerRegistryName'), '-pull-usr')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
+      ],
+      "properties": {
+        "value": "[parameters('appid')]",
+        "attributes": {
+          "enabled": true
+      }
+      }
+    }
+  ],
+  "outputs": {
+    "PasswordSecretName": {
+      "type": "string",
+      "value": "[concat(variables('keyVaultName'), '/', variables('containerRegistryName'), '-pull-pwd')]"
+    },
+    "AppIDSecretName": {
+      "type": "string",
+      "value": "[concat(variables('keyVaultName'), '/', variables('containerRegistryName'), '-pull-usr')]"
+    }
+  }
+}

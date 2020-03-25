@@ -1,0 +1,18 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "namePrefix": {
+      "value": "testrest"
+    },
+    "objectId": {
+      "value": "01a24f5c-fac9-4697-a09b-3988b7dfb056"
+    },
+    "appId": {
+      "value": "f3e51686-c925-45b3-b6ca-de41ae932fc7"
+    },
+    "password": {
+      "value": "5a5c8cab-0c66-4ce7-8ba9-54289b8ce6f8"
+    }
+  }
+}

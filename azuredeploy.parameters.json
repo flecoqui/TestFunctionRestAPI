@@ -1,0 +1,36 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "namePrefix": {
+      "value": "testrest"
+    },
+    "azFunctionAppSku": {
+      "value": "P2"
+    },
+    "webAppSku": {
+      "value": "P2"
+    },
+    "repoURL": {
+      "value": "https://github.com/flecoqui/TestRESTAPIServices.git"
+    },
+    "repoBranch": {
+      "value": "master"
+    },
+    "repoFunctionPath": {
+      "value": "TestFunctionApp"
+    },
+    "vmAdminUsername": {
+      "value": "VMAdmin"
+    },
+    "vmAdminPassword": {
+      "value": "VMP@ssw0rd"
+    },
+    "vmOS": {
+      "value": "debian"
+    },
+    "vmSize": {
+      "value": "Small"
+    }
+  }
+}

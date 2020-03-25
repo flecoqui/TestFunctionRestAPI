@@ -1,0 +1,7 @@
+{
+  "itemDisplayName": "Deploy a REST API hosted either on Azure Function or on Azure Kubernetes using Keda and Prometheus to test the scalability",
+  "description": "This template and the scripts allows you to deploy a REST API hosted either on Azure Function or on Azure Kubernetes using Keda and Prometheus to test the scalability from the source code on github",
+  "summary": "This template takes a minimum amount of parameters and deploys a REST API hosted either on Azure Function or on Azure Kubernetes using Keda and Prometheus to test the scalability from the source code on github.",
+  "githubUsername": "flecoqui",
+  "dateUpdated": "2020-03-26"
+}

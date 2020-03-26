@@ -12,15 +12,9 @@
     },
     "azFunctionAppSku": {
       "type": "string",
-      "defaultValue": "S1",
+      "defaultValue": "Y1",
       "allowedValues": [
-        "Y1",
-        "S1",
-        "S2",
-        "S3",
-        "P1",
-        "P2",
-        "P3"
+        "Y1"
       ],
       "metadata": {
         "description": "The SKU of the Azure Function you want to create."

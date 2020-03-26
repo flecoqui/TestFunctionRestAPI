@@ -174,10 +174,10 @@ For instance:
 
 When you deploy the service you can define the following parameters:</p>
 * **namePrefix:** The name prefix which will be used for all the services deployed with this ARM Template</p>
-* **azFunctionAppSku:** The Azure Function App Sku Capacity, by defualt F1</p>
+* **azFunctionAppSku:** The Azure Function App Sku Capacity, by default Y1 (consumption plan)</p>
 * **repoURL:** The github repository url</p>
 * **branch:** The branch name in the repository</p>
-* **repoFunctionPath:** The path to the Azure Function code, by default "TestFunctionApp"</p>
+* **repoFunctionPath:** The path to the Azure Function code, by default "TestFunctionAppv2" as currently it seems not possible to directly deploy Azure Function v3 from github</p>
 </p>
 
 ### DELETE THE RESOURCE GROUP:

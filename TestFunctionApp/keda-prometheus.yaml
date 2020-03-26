@@ -4,10 +4,10 @@ metadata:
     name: prometheus-scaledobject
     namespace: ingress-nginx
     labels:
-        deploymentName: function-testfunctionapp-http
+        deploymentName: function-<FunctionName>-http
 spec:
     scaleTargetRef:
-        deploymentName: function-testfunctionapp-http
+        deploymentName: function-<FunctionName>-http
     pollingInterval: 15
     cooldownPeriod:  30
     minReplicaCount: 1

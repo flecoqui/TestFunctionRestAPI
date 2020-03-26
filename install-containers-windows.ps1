@@ -9,7 +9,7 @@ param
 #      [string]$memoryInGb = $null,
       [string]$aksVMSize = $null,
       [string]$aksNodeCount = $null,
-      [string]$dockerHubAccountName = $null,
+      [string]$dockerHubAccountName = $null
 
 )
 function WriteLog($msg)

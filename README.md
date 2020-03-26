@@ -213,25 +213,24 @@ For instance:
 In order to deploy the REST API on Azure Container Instance or Azure Kubernetes you will use a Powershell script on Windows and a Bash script on Linux with the following parameters:</p>
 * **ResourceGroupName:**						The name of the resource group used to deploy Azure Function, Azure App Service and Virtual Machine</p>
 * **namePrefix:**						The name prefix which has been used to deploy Azure Function, Azure App Service and Virtual Machine</p>
-* **cpuCores:**						The number of CPU cores used by the containers on Azure Container Instance or Kubernetes, for instance : 1, by default 0.4 </p>
-* **memoryInGB:**				The amount of memory in GB used by the containers on Azure Container Instance or Kubernetes, for instance : 2, by defauylt 0.3 </p>
 * **aksVMSize:**                        The size of the Virtual Machine running on the Kubernetes Cluster, for instance: Standard_D4s_v3, by default Standard_D2s_v3</p>
 * **aksNodeCount:**                         The number of node for the Kubernetes Cluster</p>
+* **dockerHubAccountName:**						The name of the Docker Hub Account where the Function Image will be stored</p>
 </p>
 </p>
 
 Below the command lines for Windows and Linux:
 
-* **Powershell Windows:** .\install-containers-windows.ps1  "ResourceGroupName" "NamePrefix" "cpuCores" "memoryInGB" "aksVMSize" "aksNodeCount"
+* **Powershell Windows:** .\install-containers-windows.ps1  "ResourceGroupName" "NamePrefix" "aksVMSize" "aksNodeCount" "dockerHubAccountName"
 
-* **Bash Linux:** ./install-containers.sh "ResourceGroupName" "NamePrefix" "cpuCores" "memoryInGB" "aksVMSize" "aksNodeCount"
+* **Bash Linux:** ./install-containers.sh "ResourceGroupName" "NamePrefix" "aksVMSize" "aksNodeCount" "dockerHubAccountName"
 
 
 For instance:
 
-    ./install-containers.sh TestFunctionRestAPIrg testrest 2 7 Standard_D4s_v3 1
+    ./install-containers.sh TestFunctionRestAPIrg testrestapi  Standard_D2_v2 3 flecoqui
 
-    .\install-containers-windows.ps1 TestFunctionRestAPIrg testrest 2 7 Standard_D4s_v3 1
+    .\install-containers-windows.ps1 TestFunctionRestAPIrg testrestapi  Standard_D2_v2 3 flecoqui
 
 Once deployed, the following services are available in the resource group:
 
@@ -244,9 +243,6 @@ The services has been deployed with 3 command lines.
 If you want to deploy the REST API on only one single service, you can use the resources below:</p>
 
 * **Azure Function:** Template ARM to deploy Azure Function https://github.com/flecoqui/TestFunctionRestAPI/tree/master/Azure/101-function </p>
-* **Azure App Service:** Template ARM to deploy Azure App Service  https://github.com/flecoqui/TestFunctionRestAPI/tree/master/Azure/101-appservice </p>
-* **Azure Virtual Machine:** Template ARM to deploy Azure Virtual Machine https://github.com/flecoqui/TestFunctionRestAPI/tree/master/Azure/101-vm </p>
-* **Azure Container Instance:** Template ARM and scripts to deploy Azure Container Instance  https://github.com/flecoqui/TestFunctionRestAPI/tree/master/Azure/101-aci</p>
 * **Azure Kubernetes Service:** Template ARM and scripts to deploy Azure Kubernetes Service https://github.com/flecoqui/TestFunctionRestAPI/tree/master/Azure/101-aks</p>
 
 

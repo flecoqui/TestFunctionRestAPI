@@ -134,7 +134,7 @@
         ],
         "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('azFunctionPlanName'))]",
         "siteConfig": {
-          "alwaysOn": true,
+          "alwaysOn": false,
           "appSettings": [
             {
               "name": "FUNCTIONS_EXTENSION_VERSION",

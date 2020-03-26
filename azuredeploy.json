@@ -191,8 +191,8 @@
             "httpLoggingEnabled": false,
             "logsDirectorySizeLimit": 35,
             "detailedErrorLoggingEnabled": false,
-            "publishingUsername": "$testfunctionappcons",
-            "scmType": "ExternalGit",
+            
+            "scmType": "None",
             "use32BitWorkerProcess": true,
             "webSocketsEnabled": false,
             "alwaysOn": false,

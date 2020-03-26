@@ -169,7 +169,7 @@ For instance:
 
     azure group deployment create TestFunctionRestAPIrg TestFunctionRestAPIdep -f azuredeploy.json -e azuredeploy.parameters.json -vv
 
-    az group deployment create -g TestFunctionRestAPIrg -n TestFunctionRestAPIdep --template-file azuredeploy.json --parameter @azuredeploy.parameters.json --verbose -o json
+    az deployment group create -g TestFunctionRestAPIrg -n TestFunctionRestAPIdep --template-file azuredeploy.json --parameter @azuredeploy.parameters.json --verbose -o json
 
 
 When you deploy the service you can define the following parameters:</p>
@@ -179,6 +179,19 @@ When you deploy the service you can define the following parameters:</p>
 * **branch:** The branch name in the repository</p>
 * **repoFunctionPath:** The path to the Azure Function code, by default "TestFunctionApp"</p>
 </p>
+
+### DELETE THE RESOURCE GROUP:
+
+* **Azure CLI 1.0:**      azure group delete "ResourceGroupName" "RegionName"
+
+* **Azure CLI 2.0:**  az group delete -n "ResourceGroupName" "RegionName"
+
+For instance:
+
+    azure group delete TestFunctionRestAPIrg eastus2
+
+    az group delete -n TestFunctionRestAPIrg 
+
 
 ## DEPLOYING AND TESTING A FUNCTION REST API ON AZURE KUBERNETES SERVICE WITH KEDA AND PROMETHEUS
 

@@ -33,6 +33,7 @@ if($aksNodeCount -eq $null) {
 # The function name are different for DockerHub  function name and Container Registry function name
 $functionName = $prefixName + 'acrfunc' 
 $acrName = $prefixName + 'acr'
+$acrDNSName = $acrName + '.azurecr.io'
 $acrDeploymentName = $prefixName + 'acrdep'
 $acrSPName = $prefixName + 'acrsp'
 $akvName = $prefixName + 'akv'
@@ -200,7 +201,7 @@ $acrPassword  = Get-Content  .\akvpassword.txt -Raw
 $acrPassword = $acrPassword.replace("`n","").replace("`r","")
 cd .\TestFunctionApp
 WriteLog ("Creating the image for Azure Container Registry: " +  $acrName + " with secret: " + $acrPassword)
-func kubernetes deploy --name function-$functionName --namespace ingress-nginx --service-type ClusterIP --registry $acrName.azurecr.io --pull-secret $acrPassword
+func kubernetes deploy --name function-$functionName --namespace ingress-nginx --service-type ClusterIP --registry $acrDNSName --pull-secret $acrPassword
 cd ..
 WriteLog "Deploying an Ingress resource pointing to the function" 
 get-content .\TestFunctionApp\testfunctionapp.yaml | %{$_ -replace "<FunctionName>",$functionName} | %{$_ -replace "<AKSDnsNAme>",$PublicDNSName} > local_func.yaml

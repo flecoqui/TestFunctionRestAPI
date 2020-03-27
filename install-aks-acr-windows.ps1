@@ -29,8 +29,9 @@ if($aksVMSize -eq $null) {
 if($aksNodeCount -eq $null) {
      $aksNodeCount=1
 }
-
-$functionName = $prefixName + 'func' 
+# WARNING As the image name of the function must be different between DockerHub image and Azure Container Registry image
+# The function name are different for DockerHub  function name and Container Registry function name
+$functionName = $prefixName + 'acrfunc' 
 $acrName = $prefixName + 'acr'
 $acrDeploymentName = $prefixName + 'acrdep'
 $acrSPName = $prefixName + 'acrsp'
@@ -191,14 +192,14 @@ helm install keda kedacore/keda --namespace ingress-nginx
 kubectl get pods -n ingress-nginx
 
 WriteLog "Creating Function App image and deploying it" 
-cd .\TestFunctionApp
 # func init --docker-only
-WriteLog "Azure Container Registry login for : " +  $acrName
+WriteLog ("Azure Container Registry login for : " +  $acrName)
 az acr login --name $acrName
-WriteLog "Azure Container Registry Getting password for : " +  $acrName
+WriteLog ("Azure Container Registry Getting password for : " +  $acrName)
 $acrPassword  = Get-Content  .\akvpassword.txt -Raw  
 $acrPassword = $acrPassword.replace("`n","").replace("`r","")
-WriteLog "Creating the image for Azure Container Registry: " +  $acrName
+cd .\TestFunctionApp
+WriteLog ("Creating the image for Azure Container Registry: " +  $acrName + " with secret: " + $acrPassword)
 func kubernetes deploy --name function-$functionName --namespace ingress-nginx --service-type ClusterIP --registry $acrName.azurecr.io --pull-secret $acrPassword
 cd ..
 WriteLog "Deploying an Ingress resource pointing to the function" 

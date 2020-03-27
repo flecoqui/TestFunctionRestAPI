@@ -1,5 +1,5 @@
 
-#usage install-software-windows.ps1 dnsname
+#usage install-aks-dockerhub-windows.ps1 dnsname
 
 param
 (
@@ -13,7 +13,7 @@ param
 function WriteLog($msg)
 {
 Write-Host $msg
-$msg >> install-aks-windows.log
+$msg >> install-aks-dockerhub-windows.log
 }
 
 if($prefixName -eq $null) {
@@ -98,50 +98,9 @@ function Get-PublicIP($file)
     return $null
 }
 WriteLog ("Installation script is starting for resource group: " + $resourceGroupName + " with prefixName: " + $prefixName + " AKS VM size: " + $aksVMSize + " AKS Node count: " + $aksNodeCount + " Docker Hub Account Name : " + $dockerHubAccountName)
-WriteLog "Creating Azure Container Registry" 
-az deployment group create -g $resourceGroupName -n $acrDeploymentName --template-file azuredeploy.acr.json --parameter namePrefix=$prefixName --verbose -o json 
-az group deployment show -g $resourceGroupName -n $acrDeploymentName --query properties.outputs
-
-WriteLog "Creating Service Principal with role acrpull" 
-az acr show --name $acrName --query id --output tsv > acrid.txt
-$acrID = Get-Content .\acrid.txt -Raw 
-az ad sp create-for-rbac --name http://$acrSPName --scopes $acrID --role acrpull --query password --output tsv > sppassword.txt
-$acrSPPassword  = Get-Password .\sppassword.txt 
-if($acrSPPassword -eq $null) {
-     WriteLog "ACR SP Password not found "
-     throw "ACR SP Password not found "
-}
-#WriteLog ("SPPassword: " + $acrSPPassword)
-
-
-az ad sp show --id http://$acrSPName --query appId --output tsv > spappid.txt
-$acrSPAppId  = Get-Content  .\spappid.txt -Raw  
-$acrSPAppId = $acrSPAppId.replace("`n","").replace("`r","")
-
-#WriteLog ("SPAppId: " + $acrSPAppId)
-
-az ad signed-in-user show --query objectId --output tsv > spobjectid.txt
-$acrSPObjectId  = Get-Content  .\spobjectid.txt -Raw  
-$acrSPObjectId = $acrSPObjectId.replace("`n","").replace("`r","")
-#WriteLog ("SPObjectId: " + $acrSPObjectId)
-
-
-WriteLog "Adding role Reader for Service Principal" 
-az role assignment create --role Reader --assignee $acrSPAppId --scope $acrID 
-
-
-WriteLog "Creating Azure Key Vault" 
-az deployment group create -g $resourceGroupName -n $akvDeploymentName --template-file azuredeploy.akv.json --parameter namePrefix=$prefixName objectId=$acrSPObjectId  appId=$acrSPAppId  password=$acrSPPassword --verbose -o json
-az group deployment show -g $resourceGroupName -n $akvDeploymentName --query properties.outputs
-
-$pullusr = $acrName + '-pull-usr'
-$pullpwd = $acrName + '-pull-pwd'
-
-az keyvault secret show --vault-name $akvName --name $pullusr --query value -o tsv > akvappid.txt
-az keyvault secret show --vault-name $akvName --name $pullpwd --query value -o tsv > akvpassword.txt
-
 WriteLog "Deploying a kubernetes cluster" 
-az aks create --resource-group $resourceGroupName --name $aksClusterName --dns-name-prefix $aksName --node-vm-size $aksVMSize   --node-count $aksNodeCount --service-principal $acrSPAppId   --client-secret $acrSPPassword --generate-ssh-keys
+#az aks create --resource-group $resourceGroupName --name $aksClusterName --dns-name-prefix $aksName --node-vm-size $aksVMSize   --node-count $aksNodeCount --service-principal $acrSPAppId   --client-secret $acrSPPassword --generate-ssh-keys
+az aks create --resource-group $resourceGroupName --name $aksClusterName --dns-name-prefix $aksName --node-vm-size $aksVMSize   --node-count $aksNodeCount --generate-ssh-keys
 az aks get-credentials --resource-group $resourceGroupName --name $aksClusterName --overwrite-existing 
 
 WriteLog "Deploying a Tiller" 

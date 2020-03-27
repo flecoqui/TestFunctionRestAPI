@@ -1,21 +1,17 @@
 
-#usage install-software-windows.ps1 dnsname
+#usage install-aks-acr-windows.ps1 dnsname
 
 param
 (
       [string]$resourceGroupName = $null,
       [string]$prefixName = $null,
-#      [string]$cpuCores = $null,
-#      [string]$memoryInGb = $null,
       [string]$aksVMSize = $null,
-      [string]$aksNodeCount = $null,
-      [string]$dockerHubAccountName = $null
-
+      [string]$aksNodeCount = $null
 )
 function WriteLog($msg)
 {
 Write-Host $msg
-$msg >> install-aks-windows.log
+$msg >> install-aks-acr-windows.log
 }
 
 if($prefixName -eq $null) {
@@ -26,24 +22,12 @@ if($resourceGroupName -eq $null) {
      WriteLog "Installation failed resourceGroupName parameter not set "
      throw "Installation failed resourceGroupName parameter not set "
 }
-if($dockerHubAccountName -eq $null) {
-     WriteLog "Installation failed Docker Hub Account Name parameter not set "
-     throw "Installation failed Docker Hub Account Name parameter not set "
-}
-#if($cpuCores -eq $null) {
-#     $cpuCores=0.4
-#}
-#if($memoryInGb -eq $null) {
-#     $memoryInGb=0.3
-#}
+
 if($aksVMSize -eq $null) {
      $aksVMSize=Standard_D2_v2
 }
 if($aksNodeCount -eq $null) {
      $aksNodeCount=1
-}
-if($dockerHubAccountName -eq $null) {
-     $dockerHubAccountName='flecoqui'
 }
 
 $functionName = $prefixName + 'func' 
@@ -105,24 +89,10 @@ function Get-PublicIP($file)
     }
     return $null
 }
-WriteLog ("Installation script is starting for resource group: " + $resourceGroupName + " with prefixName: " + $prefixName + " AKS VM size: " + $aksVMSize + " AKS Node count: " + $aksNodeCount + " Docker Hub Account Name : " + $dockerHubAccountName)
+WriteLog ("Installation script is starting for resource group: " + $resourceGroupName + " with prefixName: " + $prefixName + " AKS VM size: " + $aksVMSize + " AKS Node count: " + $aksNodeCount )
 WriteLog "Creating Azure Container Registry" 
 az deployment group create -g $resourceGroupName -n $acrDeploymentName --template-file azuredeploy.acr.json --parameter namePrefix=$prefixName --verbose -o json 
 az group deployment show -g $resourceGroupName -n $acrDeploymentName --query properties.outputs
-
-WriteLog "Building and registrying the image in Azure Container Registry"
-# Command line below is used to build image from the local disk 
-# echo az acr build --registry $acrName   --image $imageName ..\..\. -f ..\..\Docker\Dockerfile.linux >> install-aks-windows.log
-# 
-#
-# az acr build --registry $acrName   --image $imageName ..\..\. -f ..\..\Docker\Dockerfile.linux
-
-# Command line below is used to build image directly from github
-# WriteLog "Creating task to build and register the image in Azure Container Registry"
-# az acr task create --image $imageNameId --image $latestImageName --name $imageTask --registry $acrName  --context $githubrepo --branch $githubbranch --file $dockerfilepath --commit-trigger-enabled false --pull-request-trigger-enabled false
-# WriteLog "Launching the task "
-# az acr task run  -n $imageTask -r $acrName
-
 
 WriteLog "Creating Service Principal with role acrpull" 
 az acr show --name $acrName --query id --output tsv > acrid.txt
@@ -166,11 +136,6 @@ WriteLog "Deploying a kubernetes cluster"
 az aks create --resource-group $resourceGroupName --name $aksClusterName --dns-name-prefix $aksName --node-vm-size $aksVMSize   --node-count $aksNodeCount --service-principal $acrSPAppId   --client-secret $acrSPPassword --generate-ssh-keys
 az aks get-credentials --resource-group $resourceGroupName --name $aksClusterName --overwrite-existing 
 
-WriteLog "Deploying a container in the kubernetes cluster" 
-# get-content Docker\testwebapp.linux.aks.yaml | %{$_ -replace "<ACRName>",$acrName} | %{$_ -replace "<cpuCores>",$cpuCores}  | %{$_ -replace "<memoryInGb>",$memoryInGb} > local.yaml
-# kubectl apply -f local.yaml
-
-
 WriteLog "Deploying a Tiller" 
 kubectl --namespace kube-system create serviceaccount tiller
 kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
@@ -208,22 +173,13 @@ $dnsName=$aksName
 
 # Get the resource-id of the public ip
 $PublicIPId=$(az network public-ip list --query "[?ipAddress!=null]|[?contains(ipAddress, '$IP')].[id]" --output tsv)
-
-
 WriteLog ("Public IP address ID: " + $PublicIPId) 
 
 # Update public ip address with DNS name
 az network public-ip update --ids $PublicIPId --dns-name $dnsName
-
 # get the full dns name
 $PublicDNSName=$(az network public-ip list --query "[?ipAddress!=null]|[?contains(ipAddress, '$IP')].[dnsSettings.fqdn]" --output tsv)
-
 WriteLog ("Public DNS Name: " +$PublicDNSName) 
-
-
-
-
-
 
 WriteLog "Deploying Prometheus to monitor nginx Ingress controller" 
 kubectl apply --kustomize github.com/kubernetes/ingress-nginx/deploy/prometheus/ 
@@ -234,11 +190,16 @@ WriteLog "Deploying Keda with Helm"
 helm install keda kedacore/keda --namespace ingress-nginx
 kubectl get pods -n ingress-nginx
 
-
 WriteLog "Creating Function App image and deploying it" 
 cd .\TestFunctionApp
 # func init --docker-only
-func kubernetes deploy --name function-$functionName --namespace ingress-nginx --service-type ClusterIP --registry $dockerHubAccountName
+WriteLog "Azure Container Registry login for : " +  $acrName
+az acr login --name $acrName
+WriteLog "Azure Container Registry Getting password for : " +  $acrName
+$acrPassword  = Get-Content  .\akvpassword.txt -Raw  
+$acrPassword = $acrPassword.replace("`n","").replace("`r","")
+WriteLog "Creating the image for Azure Container Registry: " +  $acrName
+func kubernetes deploy --name function-$functionName --namespace ingress-nginx --service-type ClusterIP --registry $acrName.azurecr.io --pull-secret $acrPassword
 cd ..
 WriteLog "Deploying an Ingress resource pointing to the function" 
 get-content .\TestFunctionApp\testfunctionapp.yaml | %{$_ -replace "<FunctionName>",$functionName} | %{$_ -replace "<AKSDnsNAme>",$PublicDNSName} > local_func.yaml
@@ -251,10 +212,7 @@ WriteLog "Deploying an Ingress resource pointing to the function"
 get-content .\TestFunctionApp\keda-prometheus.yaml | %{$_ -replace "<FunctionName>",$functionName}  > local_keda.yaml
 kubectl apply -f local_keda.yaml
 
-
 writelog ("curl -d '{""name"":""0123456789""}' -H ""Content-Type: application/json""  -X POST   http://" + $PublicDNSName + "/" + $functionName + "/api/values")
-
 writelog ("curl -H ""Content-Type: application/json""  -X GET   http://" + $PublicDNSName + "/" + $functionName + "/api/test")
-
 WriteLog "Installation completed !" 
 

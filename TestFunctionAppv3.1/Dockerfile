@@ -16,4 +16,4 @@ RUN dotnet publish -c release -o /app -r linux-x64 --self-contained false --no-r
 FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-bionic
 WORKDIR /app
 COPY --from=build /app ./
-ENTRYPOINT ["./TestFunctionAppv3.1"]
+ENTRYPOINT ["./TestFunctionApp"]

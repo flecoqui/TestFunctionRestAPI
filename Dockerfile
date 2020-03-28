@@ -10,10 +10,10 @@ RUN dotnet restore -r linux-x64
 # copy everything else and build app
 # COPY . ./aspnetapp/
 WORKDIR /source/aspnetapp
-RUN dotnet publish -c release -o /out -r linux-x64 --self-contained false --no-restore
+RUN dotnet publish -c release -o /app -r linux-x64 --self-contained false --no-restore
 
 # final stage/image
 FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-bionic
-WORKDIR /out
-COPY --from=build /out ./
+WORKDIR /app
+COPY --from=build /app ./
 ENTRYPOINT ["./TestFunctionApp"]

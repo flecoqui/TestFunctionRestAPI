@@ -8,7 +8,7 @@ WORKDIR /source/aspnetapp
 RUN dotnet restore -r linux-x64
 
 # copy everything else and build app
-# COPY . ./aspnetapp/
+COPY TestFunctionAppv3.1/. ./aspnetapp/
 WORKDIR /source/aspnetapp
 RUN dotnet publish -c release -o /app -r linux-x64 --self-contained false --no-restore
 

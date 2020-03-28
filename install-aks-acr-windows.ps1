@@ -214,7 +214,7 @@ WriteLog "Deploying an Ingress resource pointing to the function"
 get-content .\TestFunctionApp\keda-prometheus.yaml | %{$_ -replace "<FunctionName>",$functionName}  > local_keda.yaml
 kubectl apply -f local_keda.yaml
 
-writelog ("curl -d '{""name"":""0123456789""}' -H ""Content-Type: application/json""  -X POST   http://" + $PublicDNSName + "/" + $functionName + "/api/values")
+writelog ("curl -d ""{\""name\"":\""0123456789\""}"" -H ""Content-Type: application/json""  -X POST   http://"  -X POST   http://" + $PublicDNSName + "/" + $functionName + "/api/values")
 writelog ("curl -H ""Content-Type: application/json""  -X GET   http://" + $PublicDNSName + "/" + $functionName + "/api/test")
 WriteLog "Installation completed !" 
 

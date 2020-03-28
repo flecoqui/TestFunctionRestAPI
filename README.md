@@ -13,7 +13,7 @@ The REST API (api/values) is actually an JSON echo service, if you send a Json s
 Below a curl command line to send the request:
 
 
-          curl -v -d "{'name':'0123456789'}" -H "Content-Type: application/json"  -X POST   https://<hostname>/api/values
+          curl -v -d "{\"name\":\"0123456789\"}" -H "Content-Type: application/json"  -X POST   https://<hostname>/api/values
 
           curl -v -H "Content-Type: application/json"  -X GET https://<hostname>/api/values?name=0123456789
 
@@ -123,7 +123,7 @@ In order to test locally the function, you can use Azure Function core Tool to r
 4. Open another Command Shell windows, and launch the following curl commands
 
 
-          curl -d "{'name':'0123456789'}" -H "Content-Type: application/json"  -X POST   http://localhost:7071/api/values
+          curl -d "{\"name\":\"0123456789\"}" -H "Content-Type: application/json"  -X POST   http://localhost:7071/api/values
 
           curl -H "Content-Type: application/json"  -X GET http://localhost:7071/api/values?name=0123456789
 
@@ -133,7 +133,7 @@ In order to test locally the function, you can use Azure Function core Tool to r
 If the commands above do not return any strings, use the curl option -v to display the http Error Code:
 
 
-          curl -v -d "{'name':'0123456789'}" -H "Content-Type: application/json"  -X POST   http://localhost:7071/api/values
+          curl -v -d "{\"name\":\"0123456789\"}" -H "Content-Type: application/json"  -X POST   http://localhost:7071/api/values
 
           curl -v -H "Content-Type: application/json"  -X GET http://localhost:7071/api/values?name=0123456789
 

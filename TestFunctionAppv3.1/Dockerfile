@@ -3,11 +3,12 @@ FROM mcr.microsoft.com/dotnet/core/sdk:3.1 AS build
 WORKDIR /source
 
 # copy csproj and restore as distinct layers
-COPY *.csproj ./aspnetapp/
+COPY TestFunctionAppv3.1/*.csproj ./aspnetapp/
+WORKDIR /source/aspnetapp
 RUN dotnet restore -r linux-x64
 
 # copy everything else and build app
-COPY . ./aspnetapp/
+# COPY . ./aspnetapp/
 WORKDIR /source/aspnetapp
 RUN dotnet publish -c release -o /app -r linux-x64 --self-contained false --no-restore
 
@@ -15,4 +16,4 @@ RUN dotnet publish -c release -o /app -r linux-x64 --self-contained false --no-r
 FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-bionic
 WORKDIR /app
 COPY --from=build /app ./
-ENTRYPOINT ["./aspnetapp"]
+ENTRYPOINT ["./TestFunctionAppv3.1"]

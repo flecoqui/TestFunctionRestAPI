@@ -221,16 +221,16 @@ In order to deploy the REST API on Azure Container Instance or Azure Kubernetes,
 
 Below the command lines for Windows and Linux, before launching the command line below check that the Docker Deamon is running on your machine:
 
-* **Powershell Windows:** C:\git\Me\TestFunctionRestAPI> .\install-aks-dockerhub-windows.ps1  "ResourceGroupName" "NamePrefix" "aksVMSize" "aksNodeCount" "dockerHubAccountName"
+* **Powershell Windows:** C:\git\Me\TestFunctionRestAPI> .\install-aks-dockerhub-function-windows.ps1  "ResourceGroupName" "NamePrefix" "aksVMSize" "aksNodeCount" "dockerHubAccountName"
 
-* **Bash Linux:** ./install-aks-dockerhub.sh "ResourceGroupName" "NamePrefix" "aksVMSize" "aksNodeCount" "dockerHubAccountName"
+* **Bash Linux:** ./install-aks-dockerhub-function.sh "ResourceGroupName" "NamePrefix" "aksVMSize" "aksNodeCount" "dockerHubAccountName"
 
 
 For instance:
 
-    ./install-aks-dockerhub.sh TestFunctionRestAPIrg testrestapi  Standard_D2_v2 3 flecoqui
+    ./install-aks-dockerhub-function.sh TestFunctionRestAPIrg testrestapi  Standard_D2_v2 3 flecoqui
 
-    C:\git\Me\TestFunctionRestAPI> .\install-aks-dockerhub-windows.ps1 TestFunctionRestAPIrg testrestapi  Standard_D2_v2 3 flecoqui
+    C:\git\Me\TestFunctionRestAPI> .\install-aks-dockerhub-function-windows.ps1 TestFunctionRestAPIrg testrestapi  Standard_D2_v2 3 flecoqui
 
 Once deployed, the following services are available in the resource group:
 
@@ -256,16 +256,16 @@ In order to deploy the REST API on Azure Container Instance or Azure Kubernetes,
 
 Below the command lines for Windows and Linux, before launching the command line below check that the Docker Deamon is running on your machine:
 
-* **Powershell Windows:** C:\git\Me\TestFunctionRestAPI> .\install-aks-acr-windows.ps1  "ResourceGroupName" "NamePrefix" "aksVMSize" "aksNodeCount" 
+* **Powershell Windows:** C:\git\Me\TestFunctionRestAPI> .\install-aks-acr-function-windows.ps1  "ResourceGroupName" "NamePrefix" "aksVMSize" "aksNodeCount" 
 
-* **Bash Linux:** ./install-aks-acr.sh "ResourceGroupName" "NamePrefix" "aksVMSize" "aksNodeCount" 
+* **Bash Linux:** ./install-aks-acr-function.sh "ResourceGroupName" "NamePrefix" "aksVMSize" "aksNodeCount" 
 
 
 For instance:
 
-    ./install-aks-acr.sh TestFunctionRestAPIrg testrestapi  Standard_D2_v2 3 
+    ./install-aks-acr-function.sh TestFunctionRestAPIrg testrestapi  Standard_D2_v2 3 
 
-    C:\git\Me\TestFunctionRestAPI> .\install-aks-acr-windows.ps1 TestFunctionRestAPIrg testrestapi  Standard_D2_v2 3 
+    C:\git\Me\TestFunctionRestAPI> .\install-aks-acr-function-windows.ps1 TestFunctionRestAPIrg testrestapi  Standard_D2_v2 3 
 
 
 ### DELETE THE RESOURCE GROUP:

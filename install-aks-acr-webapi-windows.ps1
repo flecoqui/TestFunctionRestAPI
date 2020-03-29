@@ -209,8 +209,8 @@ $acrPassword  = Get-Content  .\akvpassword.txt -Raw
 $acrPassword = $acrPassword.replace("`n","").replace("`r","")
 
 WriteLog "Deploying WebAPI Net Core 3.1 container hosting the function" 
-get-content .\TestFunctionAppv3.1\webapideployment.yaml | %{$_ -replace "<FunctionName>",$functionName} | %{$_ -replace "<ACRName>",$acrName} | %{$_ -replace "<ACRSecret>",$acrPassword}  > local_func.yaml
-kubectl apply -f local_func.yaml
+get-content .\TestFunctionAppv3.1\webapideployment.yaml | %{$_ -replace "<FunctionName>",$functionName} | %{$_ -replace "<ACRName>",$acrName} | %{$_ -replace "<ACRSecret>",$acrPassword}  > local_webapi.yaml
+kubectl apply -f local_webapi.yaml
 
 WriteLog "Deploying an Ingress resource pointing to the function" 
 get-content .\TestFunctionAppv3.1\testfunctionapp.yaml | %{$_ -replace "<FunctionName>",$functionName} | %{$_ -replace "<AKSDnsName>",$PublicDNSName} > local_func.yaml
@@ -223,7 +223,7 @@ WriteLog "Deploying an Ingress resource pointing to the function"
 get-content .\TestFunctionAppv3.1\keda-prometheus.yaml | %{$_ -replace "<FunctionName>",$functionName}  > local_keda.yaml
 kubectl apply -f local_keda.yaml
 
-writelog ("curl -d ""{\""name\"":\""0123456789\""}"" -H ""Content-Type: application/json""  -X POST   http://"  -X POST   http://" + $PublicDNSName + "/" + $functionName + "/api/values")
+writelog ("curl -d ""{\""name\"":\""0123456789\""}"" -H ""Content-Type: application/json""  -X POST   http://" + $PublicDNSName + "/" + $functionName + "/api/values")
 writelog ("curl -H ""Content-Type: application/json""  -X GET   http://" + $PublicDNSName + "/" + $functionName + "/api/test")
 WriteLog "Installation completed !" 
 

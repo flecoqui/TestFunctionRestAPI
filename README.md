@@ -244,7 +244,7 @@ If you want to deploy the REST API on only one single service, you can use the r
 * **Azure Function:** Template ARM to deploy Azure Function https://github.com/flecoqui/TestFunctionRestAPI/tree/master/Azure/101-function </p>
 * **Azure Kubernetes Service:** Template ARM and scripts to deploy Azure Kubernetes Service https://github.com/flecoqui/TestFunctionRestAPI/tree/master/Azure/101-aks</p>
 
-### DEPLOY REST API ON AZURE KUBERNETES SERVICE USING AZURE CONTAINER REGISTRY:
+### DEPLOY REST API IN A FUNCTION ON AZURE KUBERNETES SERVICE USING AZURE CONTAINER REGISTRY:
 
 In order to deploy the REST API on Azure Container Instance or Azure Kubernetes, you will use a Powershell script on Windows and a Bash script on Linux with the following parameters:</p>
 * **ResourceGroupName:**						The name of the resource group used to deploy Azure Function, Azure App Service and Virtual Machine</p>
@@ -268,6 +268,29 @@ For instance:
     C:\git\Me\TestFunctionRestAPI> .\install-aks-acr-function-windows.ps1 TestFunctionRestAPIrg testrestapi  Standard_D2_v2 3 
 
 
+### DEPLOY REST API IN A .Net Core 3.1 WEBAPI ON AZURE KUBERNETES SERVICE USING AZURE CONTAINER REGISTRY:
+
+In order to deploy the REST API on Azure Container Instance or Azure Kubernetes, you will use a Powershell script on Windows and a Bash script on Linux with the following parameters:</p>
+* **ResourceGroupName:**						The name of the resource group used to deploy Azure Function, Azure App Service and Virtual Machine</p>
+* **namePrefix:**						The name prefix which has been used to deploy Azure Function, Azure App Service and Virtual Machine</p>
+* **aksVMSize:**                        The size of the Virtual Machine running on the Kubernetes Cluster, for instance: Standard_D4s_v3, by default Standard_D2s_v3</p>
+* **aksNodeCount:**                         The number of node for the Kubernetes Cluster</p>
+</p>
+</p>
+
+Below the command lines for Windows and Linux, before launching the command line below check that the Docker Deamon is running on your machine:
+
+* **Powershell Windows:** C:\git\Me\TestFunctionRestAPI> .\install-aks-acr-webapi-windows.ps1  "ResourceGroupName" "NamePrefix" "aksVMSize" "aksNodeCount" 
+
+* **Bash Linux:** ./install-aks-acr-webapi.sh "ResourceGroupName" "NamePrefix" "aksVMSize" "aksNodeCount" 
+
+
+For instance:
+
+    ./install-aks-acr-webapi.sh TestFunctionRestAPIrg testrestapi  Standard_D2_v2 3 
+
+    C:\git\Me\TestFunctionRestAPI> .\install-aks-acr-webapi-windows.ps1 TestFunctionRestAPIrg testrestapi  Standard_D2_v2 3 
+
 ### DELETE THE RESOURCE GROUP:
 
 * **Azure CLI 1.0:**      azure group delete "ResourceGroupName" "RegionName"
@@ -285,17 +308,29 @@ For instance:
 
 ## TEST THE SERVICES WITH CURL
 Once the services are deployed, you can test the REST API using Curl. You can download curl from here https://curl.haxx.se/download.html 
-For instance :
+For instance for the Azure Function:
 
      curl -d '{"name":"0123456789"}' -H "Content-Type: application/json"  -X POST   https://<namePrefix>function.azurewebsites.net/api/values
-     curl -d '{"name":"0123456789"}' -H "Content-Type: application/json"  -X POST   http://<namePrefix>aks.<Region>.cloudapp.azure.com/api/values
+
+For instance for the Function in a container with image stored on DockerHub:
+
+     curl -d '{"name":"0123456789"}' -H "Content-Type: application/json"  -X POST   http://<namePrefix>aks.<Region>.cloudapp.azure.com/<namePrefix>hubfunc/api/values
+
+For instance for the Function in a container with image stored on Azure Container Registry:
+
+     curl -d '{"name":"0123456789"}' -H "Content-Type: application/json"  -X POST   http://<namePrefix>aks.<Region>.cloudapp.azure.com/<namePrefix>acrfunc/api/values
+
+For instance for the .Net Core 3.1 WebAPI in a container with image stored on Azure Container Registry:
+
+     curl -d '{"name":"0123456789"}' -H "Content-Type: application/json"  -X POST   http://<namePrefix>aks.<Region>.cloudapp.azure.com/<namePrefix>acrwebapi/api/values
+
 
 </p>
 
 ## TEST THE SERVICES WITH VEGETA
 You can also test the scalability of the REST API using Vegeta. 
 You can deploy a Virtual Machine running Vageta using the ARM Template here: https://github.com/flecoqui/101-vm-simple-vegeta-universal 
-While deploying Vegeta, you can select the type of Virtual Machine: Windows, Debian, Ubuntu, RedHat, Centos.
+Before deploying the virtual machine running Vegeta, you can select the type of Virtual Machine: Windows, Debian, Ubuntu, RedHat, Centos.
 
 Vegeta will be pre-installed on those virtual machines.
 
@@ -306,10 +341,27 @@ Once connected with the Vegate Virtual Machine, open the Command Shell and launc
 
 
 
-where the file targets.txt contains the following lines: </p>
+where the file targets.txt contains the following lines for the Azure Function: </p>
 
+          POST http://<namePrefix>function.azurewebsites.net/api/values
+          Content-Type: application/json
+          @data.json
 
-          POST http://testrestfunction.azurewebsites.net/api/values
+where the file targets.txt contains the following lines for  the Function in a container with image stored on DockerHub: </p>
+
+          POST http://<namePrefix>aks.<Region>.cloudapp.azure.com/<namePrefix>hubfunc/api/values
+          Content-Type: application/json
+          @data.json
+
+where the file targets.txt contains the following lines  for the Function in a container with image stored on Azure Container Registry: </p>
+
+          POST http://<namePrefix>aks.<Region>.cloudapp.azure.com/<namePrefix>acrfunc/api/values
+          Content-Type: application/json
+          @data.json
+
+where the file targets.txt contains the following lines for the .Net Core 3.1 WebAPI in a container with image stored on Azure Container Registry: </p>
+
+          POST http://<namePrefix>aks.<Region>.cloudapp.azure.com/<namePrefix>acrwebapi/api/values
           Content-Type: application/json
           @data.json
 
@@ -317,74 +369,64 @@ where the file targets.txt contains the following lines: </p>
 
 where the file data.json contains the following lines: </p>
 
-
          '{"name":"0123456789"}'
 
-Below the tests results for:
-* **Azure Function:**   Plan P2 (2 Cores + 7 GB)
-* **Azure App Service:**  Plan P2 (2 Cores + 7 GB)
-* **Azure Virtual Machine:**  D2s_V3 VM (2 Cores + 8 GB)
-* **Azure Virtual Machine:**  D2s_V3 VM (2 Cores + 8 GB)
-* **Azure Container Instance:**  container with 2 Cores + 7 GB
-* **Azure Kubernetes Service:**  D4s_V3 VM in the cluster and container with 2 Cores + 7 GB
- 
-Using the following command where "MaxRate" is the maximum rate where the REST API doesn't return any error while receiving a burst of request during 1 second:
+
+Before launching the test on the Vegeta virtual machine launch the following kubectl command on your machine to check how many instances of the pod running the Web API are running:
+
+        kubectl get pods -n ingress-nginx
+
+The result should be similar to the lines below for a .Net Core 3.1 WebAPI showing one signle instance:
+
+        NAME                                                              READY   STATUS    RESTARTS   AGE
+        function-testrestapiacrwebapi-http-6fb4c9f85b-g726f               1/1     Running   0          67m
+        ingress-controller-nginx-ingress-controller-5bb68d7957-4r5vx      1/1     Running   0          69m
+        ingress-controller-nginx-ingress-controller-5bb68d7957-vmprc      1/1     Running   0          69m
+        ingress-controller-nginx-ingress-default-backend-7cdd9c96frjc6d   1/1     Running   0          69m
+        keda-operator-6bdf8cbb68-jvffg                                    1/1     Running   0          67m
+        keda-operator-metrics-apiserver-78cd458bf-f92hf                   1/1     Running   0          67m
+        prometheus-server-7f56b89f78-h2xkp                                1/1     Running   0          67m
+
+On the virtual machine running vegeta launch for instance the following command to send 3000 requests per second during 10 seconds: 
+
+        C:\testvegeta>vegeta attack -duration=10s -rate 3000 -targets=targets.txt | vegeta report
+
+As AKS, Keda and Promotheus will detect the incoming traffic normally the service should auto-scale and 100% of a http request should get a response:    
+
+        Requests      [total, rate, throughput]         29995, 2999.77, 2998.27
+        Duration      [total, attack, wait]             10.004s, 9.999s, 5.001ms
+        Latencies     [min, mean, 50, 90, 95, 99, max]  999.8µs, 78.746ms, 39.51ms, 178.976ms, 311.516ms, 649.747ms, 1.785s
+        Bytes In      [total, mean]                     1319780, 44.00
+        Bytes Out     [total, mean]                     689885, 23.00
+        Success       [ratio]                           100.00%
+        Status Codes  [code:count]                      200:29995
 
 
-           vegeta attack -duration=1s -rate <MaxRate> -targets=target-function.txt | vegeta report
+If you launch again the kubectl command to know how many instances of the pod are running, you shoudl see a result similar to the one below:
+
+        kubectl get pods -n ingress-nginx
 
 
-Using the following command where "MaxRate" is the maximum rate where the REST API doesn't return any error while receiving  requests during 60 second:
+        NAME                                                              READY   STATUS    RESTARTS   AGE
+        function-testrestapiacrwebapi-http-6fb4c9f85b-59kkp               1/1     Running   0          3m35s
+        function-testrestapiacrwebapi-http-6fb4c9f85b-5cvwm               1/1     Running   0          3m19s
+        function-testrestapiacrwebapi-http-6fb4c9f85b-7bxxs               1/1     Running   0          3m19s
+        function-testrestapiacrwebapi-http-6fb4c9f85b-cn5f7               1/1     Running   0          3m50s
+        function-testrestapiacrwebapi-http-6fb4c9f85b-g2xkt               1/1     Running   0          3m35s
+        function-testrestapiacrwebapi-http-6fb4c9f85b-g726f               1/1     Running   0          75m
+        function-testrestapiacrwebapi-http-6fb4c9f85b-l6lvf               1/1     Running   0          3m35s
+        function-testrestapiacrwebapi-http-6fb4c9f85b-n5zc9               1/1     Running   0          3m50s
+        function-testrestapiacrwebapi-http-6fb4c9f85b-t4p59               1/1     Running   0          3m35s
+        function-testrestapiacrwebapi-http-6fb4c9f85b-xw564               1/1     Running   0          3m50s
+        ingress-controller-nginx-ingress-controller-5bb68d7957-4r5vx      1/1     Running   0          77m
+        ingress-controller-nginx-ingress-controller-5bb68d7957-vmprc      1/1     Running   0          77m
+        ingress-controller-nginx-ingress-default-backend-7cdd9c96frjc6d   1/1     Running   0          77m
+        keda-operator-6bdf8cbb68-jvffg                                    1/1     Running   0          75m
+        keda-operator-metrics-apiserver-78cd458bf-f92hf                   1/1     Running   0          75m
+        prometheus-server-7f56b89f78-h2xkp                                1/1     Running   0          75m
 
-
-           vegeta attack -duration=1s -rate <MaxRate> -targets=target-function.txt | vegeta report
-
-
-
-
-
-|  Azure Function Plan | 1 second burst max http request rate | 60 seconds continuous max http request rate |
-|:----------------------:|:--------------------------------------:|:---------------------------------------------:|
-| P2 ((2 Cores + 7 GB))|        5000 requests/second          |           300 requests/second               |
-
-
-|  Azure App Service Plan | 1 second burst max http request rate | 60 seconds continuous max http request rate |
-|:-------------------------:|:--------------------------------------:|:---------------------------------------------:|
-| P2 (2 Cores + 7 GB)     |        7000 requests/second          |          1000 requests/second               |
-
-
-|  Azure VM Size          | 1 second burst max http request rate | 60 seconds continuous max http request rate |
-|:-------------------------:|:--------------------------------------:|:---------------------------------------------:|
-| D2s_v3 (2 Cores + 8 GB) |        9000 requests/second          |          8000 requests/second               |
-
-
-|  Azure Container Instance | 1 second burst max http request rate | 60 seconds continuous max http request rate |
-|:-------------------------:|:--------------------------------------:|:---------------------------------------------:|
-|  2 Cores + 7 GB         |        6000 requests/second          |          6000 requests/second               |
-
-
-|  Azure Kubernetes Service | 1 second burst max http request rate | 60 seconds continuous max http request rate |
-|:-------------------------:|:--------------------------------------:|:---------------------------------------------:|
-|  D4s_v3 - 2 Cores + 7 GB   |       12000 requests/second          |         10000 requests/second               |
 
 # DELETE THE REST API SERVICES 
-
-## DELETE AZURE CONTAINER REGISTRY SERVICE PRINCIPAL :
-
-**Azure CLI 2.0:** az ad sp  delete --id "ServicePrincipalUrl"
-
-For instance:
-
-    az ad sp delete --id http://testrestacrsp
-
-## DELETE AZURE KUBERNETES SERVICE :
-
-**Azure CLI 2.0:** az aks delete --name "AKSClusterName" --resource-group "ResourceGroupName" 
-
-For instance:
-
-    az aks delete --name testrestaksCluster --resource-group TestFunctionRestAPIrg
-
 
 ## DELETE THE RESOURCE GROUP:
 

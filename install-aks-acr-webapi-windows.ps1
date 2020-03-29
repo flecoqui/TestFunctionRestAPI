@@ -11,7 +11,7 @@ param
 function WriteLog($msg)
 {
 Write-Host $msg
-$msg >> install-aks-acr-windows.log
+$msg >> install-aks-acr-webapi-windows.log
 }
 
 if($prefixName -eq $null) {

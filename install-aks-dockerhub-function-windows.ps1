@@ -1,5 +1,5 @@
 
-#usage install-aks-dockerhub-windows.ps1 dnsname
+#usage install-aks-dockerhub-windows.ps1 
 
 param
 (
@@ -13,7 +13,7 @@ param
 function WriteLog($msg)
 {
 Write-Host $msg
-$msg >> install-aks-dockerhub-windows.log
+$msg >> install-aks-dockerhub-function-windows.log
 }
 
 if($prefixName -eq $null) {
@@ -52,14 +52,15 @@ $acrSPObjectId = ''
 $akvDeploymentName = $prefixName + 'akvdep'
 $aciDeploymentName = $prefixName + 'acidep'
 $aksDeploymentName = $prefixName + 'aksdep'
-$imageName = 'testwebapp.linux'
+$imageName = 'function-' + $functionName
 $imageNameId = $imageName + ':{{.Run.ID}}'
 $imageTag = 'latest'
 $latestImageName = $imageName+ ':' + $imageTag
-$imageTask = 'testwebapplinuxtask'
-$githubrepo = 'https://github.com/flecoqui/TestRESTAPIServices.git'
+$imageTask =  $imageName + 'task'
+$githubrepo = 'https://github.com/flecoqui/TestFunctionRestAPI.git'
 $githubbranch = 'master'
-$dockerfilepath = 'Docker\Dockerfile.linux'
+$dockerfilepath = 'TestFunctionAppv3.1\Dockerfile'
+
 
 function WriteLog($msg)
 {

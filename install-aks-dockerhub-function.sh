@@ -1,23 +1,21 @@
 #!/bin/bash
 # Parameter 1 resourceGroupName 
 # Parameter 2 prefixName 
-# Parameter 3 cpuCores 
-# Parameter 4 memoryInGb
-# Parameter 5 aksVMSize
-# Parameter 6 aksNodeCount
+# Parameter 3 aksVMSize
+# Parameter 4 aksNodeCount
+# Parameter 5 dockerHubAccountName
 resourceGroupName=$1
 prefixName=$2 
-cpuCores=$3 
-memoryInGb=$4
-aksVMSize=$5
-aksNodeCount=$6
+aksVMSize=$3
+aksNodeCount=$4
+dockerHubAccountName=$5
 
 
 #############################################################################
 WriteLog()
 {
 	echo "$1"
-	echo "$1" >> ./install-container.log
+	echo "$1" >> ./install-aks-dockerhub-function.log
 }
 #############################################################################
 function Get-FirstLine()
@@ -105,12 +103,8 @@ if [ -z "$prefixName" ]; then
    WriteLog 'prefixName not set'
    exit 1
 fi
-if [ -z "$cpuCores" ]; then
-   cpuCores=0.4
-   exit 1
-fi
-if [ -z "$memoryInGb" ]; then
-   memoryInGb=0.3
+if [ -z "$dockerHubAccountName" ]; then
+   WriteLog 'Docker Hub Account Name not set'
    exit 1
 fi
 if [ -z "$aksVMSize" ]; then
@@ -126,7 +120,7 @@ fi
 environ=`env`
 WriteLog "Environment before installation: $environ"
 
-WriteLog "Installation script is starting for resource group: $resourceGroupName with prefixName: $prefixName cpu: $cpuCores memory: $memoryInGb AKS VM Size: $aksVMSize and AKS node count: $aksNodeCount
+WriteLog "Installation script is starting for resource group: $resourceGroupName with prefixName: $prefixName AKS VM Size: $aksVMSize AKS node count: $aksNodeCount Docker Hub Account: $dockerHubAccountName "
 check_os
 if [ $iscentos -ne 0 ] && [ $isredhat -ne 0 ] && [ $isubuntu -ne 0 ] && [ $isdebian -ne 0 ];
 then
@@ -134,6 +128,7 @@ then
     exit 1 
 else
 # To be completed
+functionName=$prefixName'hubfunc' 
 acrName=$prefixName'acr'
 acrDeploymentName=$prefixName'acrdep'
 acrSPName=$prefixName'acrsp'
@@ -146,92 +141,36 @@ acrSPObjectId=''
 akvDeploymentName=$prefixName'akvdep'
 aciDeploymentName=$prefixName'acidep'
 aksDeploymentName=$prefixName'aksdep'
-imageName='testwebapp.linux'
+imageName='function-'$functionName
 imageNameId=$imageName':{{.Run.ID}}'
 imageTag='latest'
 latestImageName=$imageName':'$imageTag
-imageTask='testwebapplinuxtask'
-githubrepo='https://github.com/flecoqui/TestRESTAPIServices.git'
+imageTask=$imageName'task'
+githubrepo='https://github.com/flecoqui/TestFunctionRestAPI.git'
 githubbranch='master'
-dockerfilepath='Docker/Dockerfile.linux'
+dockerfilepath='TestFunctionAppv3.1\Dockerfile'
 
-WriteLog "Installation script is starting for resource group: " $resourceGroupName " with prefixName: " $prefixName " cpuCores: " $cpuCores " memoryInGb: " $memoryInGb " AKS VM size: " $aksVMSize " AKS Node count: " $aksNodeCount
-WriteLog "Creating Azure Container Registry" 
-az group deployment create -g $resourceGroupName -n $acrDeploymentName --template-file azuredeploy.acr.json --parameter namePrefix=$prefixName --verbose -o json 
-az group deployment show -g $resourceGroupName -n $acrDeploymentName --query properties.outputs
-
-WriteLog "Building and registrying the image in Azure Container Registry"
-# Command line below is used to build image from the local disk 
-# echo az acr build --registry $acrName   --image $imageName ..\..\. -f ..\..\Docker\Dockerfile.linux >> install-aks-windows.log
-# 
-#
-# az acr build --registry $acrName   --image $imageName ..\..\. -f ..\..\Docker\Dockerfile.linux
-
-# Command line below is used to build image directly from github
-WriteLog "Creating task to build and register the image in Azure Container Registry"
-az acr task create --image $imageNameId --image $latestImageName --name $imageTask --registry $acrName  --context $githubrepo --branch $githubbranch --file $dockerfilepath --commit-trigger-enabled false --pull-request-trigger-enabled false
-WriteLog "Launching the task "
-az acr task run  -n $imageTask -r $acrName
-
-
-WriteLog "Creating Service Principal with role acrpull" 
-az acr show --name $acrName --query id --output tsv > acrid.txt
-acrID=$(Get-FirstLine ./acrid.txt) 
-az ad sp create-for-rbac --name http://$acrSPName --scopes $acrID --role acrpull --query password --output tsv > sppassword.txt
-#acrSPPassword=$(Get-Password ./sppassword.txt) 
-acrSPPassword=$(Get-FirstLine ./sppassword.txt) 
-if [ $acrSPPassword = "" ]; then
-     WriteLog "ACR SP Password not found "
-     exit 1
-fi
-WriteLog "SPPassword: "$acrSPPassword
-
-
-az ad sp show --id http://$acrSPName --query appId --output tsv > spappid.txt
-acrSPAppId=$(Get-FirstLine  ./spappid.txt)  
-#$acrSPAppId = $acrSPAppId.replace("`n","").replace("`r","")
-
-WriteLog "SPAppId: "$acrSPAppId
-
-az ad signed-in-user show --query objectId --output tsv > spobjectid.txt
-acrSPObjectId=$(Get-FirstLine  ./spobjectid.txt)  
-#$acrSPObjectId = $acrSPObjectId.replace("`n","").replace("`r","")
-WriteLog "SPObjectId: "$acrSPObjectId
-
-
-WriteLog "Adding role Reader for Service Principal" 
-az role assignment create --role Reader --assignee $acrSPAppId --scope $acrID 
-
-
-WriteLog "Creating Azure Key Vault" 
-az group deployment create -g $resourceGroupName -n $akvDeploymentName --template-file azuredeploy.akv.json --parameter namePrefix=$prefixName objectId=$acrSPObjectId  appId=$acrSPAppId  password=$acrSPPassword --verbose -o json
-az group deployment show -g $resourceGroupName -n $akvDeploymentName --query properties.outputs
-
-pullusr=$acrName'-pull-usr'
-pullpwd=$acrName'-pull-pwd'
-
-az keyvault secret show --vault-name $akvName --name $pullusr --query value -o tsv > akvappid.txt
-az keyvault secret show --vault-name $akvName --name $pullpwd --query value -o tsv > akvpassword.txt
-
-WriteLog "Deploying a container on Azure Container Instance" 
-#$cmdtest = "az group deployment create -g " + $resourceGroupName +" -n " + $aciDeploymentName + "--template-file azuredeploy.aci.json --parameter namePrefix=" + $prefixName + " imageName=" + $imageName +" appId=" + $acrSPAppId + " password=" + $acrSPPassword +"  cpuCores='0.4' memoryInGb='0.3' --verbose -o json"
-#WriteLog $cmdtest
-
-
-az group deployment create -g $resourceGroupName -n $aciDeploymentName --template-file azuredeploy.aci.json --parameter namePrefix=$prefixName imageName=$latestImageName  appId=$acrSPAppId  password=$acrSPPassword cpuCores=$cpuCores memoryInGb=$memoryInGb --verbose -o json
-az group deployment show -g $resourceGroupName -n $aciDeploymentName --query properties.outputs
 
 
 WriteLog "Deploying a kubernetes cluster" 
-az aks create --resource-group $resourceGroupName --name $aksClusterName --dns-name-prefix $aksName --node-vm-size $aksVMSize   --node-count $aksNodeCount --service-principal $acrSPAppId   --client-secret $acrSPPassword --generate-ssh-keys
-
+az aks create --resource-group $resourceGroupName --name $aksClusterName --dns-name-prefix $aksName --node-vm-size $aksVMSize   --node-count $aksNodeCount --generate-ssh-keys
 az aks get-credentials --resource-group $resourceGroupName --name $aksClusterName --overwrite-existing 
 
-WriteLog "Deploying a container in the kubernetes cluster" 
-sed 's/<ACRName>/'$acrName'/g' ./Docker/testwebapp.linux.aks.yaml > local.yaml
-sed -i 's/<cpuCores>/'$cpuCores'/g' local.yaml
-sed -i 's/<memoryInGb>/'$memoryInGb'/g' local.yaml
-kubectl apply -f local.yaml
+WriteLog "Deploying a Tiller" 
+kubectl --namespace kube-system create serviceaccount tiller
+kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
+
+WriteLog "Preparing Helm repository" 
+helm repo add stable https://kubernetes-charts.storage.googleapis.com/
+helm repo add kedacore https://kedacore.github.io/charts
+
+WriteLog "Creating the name space" 
+kubectl create namespace ingress-nginx
+
+WriteLog "Deploying nginx Ingress controller with Helm" 
+helm install ingress-controller stable/nginx-ingress --namespace ingress-nginx --set controller.replicaCount=2 --set controller.metrics.enabled=true --set controller.podAnnotations."prometheus\.io/scrape"="true" --set controller.podAnnotations."prometheus\.io/port"="10254"
+
+
 WriteLog "Waiting for Public IP address during 10 minutes max" 
 count=0
 IP='<pending>'
@@ -262,17 +201,41 @@ PublicIPId=$(az network public-ip list --query "[?ipAddress!=null]|[?contains(ip
 
 
 WriteLog "Public IP address ID: "$PublicIPId 
-
 # Update public ip address with DNS name
 az network public-ip update --ids $PublicIPId --dns-name $dnsName
 
 # get the full dns name
 PublicDNSName=$(az network public-ip list --query "[?ipAddress!=null]|[?contains(ipAddress, '$IP')].[dnsSettings.fqdn]" --output tsv)
-
-
 WriteLog "Public DNS Name: "$PublicDNSName 
-WriteLog "curl -d '{\""name\"":\""0123456789\""}' -H \""Content-Type: application/json\""  -X POST   http://"$PublicDNSName"/api/values"
-WriteLog "curl -H \""Content-Type: application/json\""  -X GET   http://"$PublicDNSName"/api/test"
+
+WriteLog "Deploying Prometheus to monitor nginx Ingress controller" 
+kubectl apply --kustomize github.com/kubernetes/ingress-nginx/deploy/prometheus/ 
+kubectl -n ingress-nginx get svc
+kubectl -n ingress-nginx get pods
+
+WriteLog "Deploying Keda with Helm" 
+helm install keda kedacore/keda --namespace ingress-nginx
+kubectl get pods -n ingress-nginx
+
+WriteLog "Creating Function App image and deploying it" 
+cd ./TestFunctionApp
+# func init --docker-only
+func kubernetes deploy --name function-$functionName --namespace ingress-nginx --service-type ClusterIP --registry $dockerHubAccountName
+cd ..
+WriteLog "Deploying an Ingress resource pointing to the function" 
+sed 's/<FunctionName>/'$functionName'/g' ./TestFunctionApp/testfunctionapp.yaml > local_func.yaml
+sed -i 's/<AKSDnsName>/'$PublicDNSName'/g' local_func.yaml
+kubectl apply -f local_func.yaml
+
+WriteLog "Deploying an Ingress resource pointing to prometheus server" 
+kubectl apply -f .\TestFunctionApp\ingress-prometheus.yaml
+
+WriteLog "Deploying an Ingress resource pointing to the function" 
+sed 's/<FunctionName>/'$functionName'/g' ./TestFunctionApp/keda-prometheus.yaml > local_func.yaml
+kubectl apply -f local_keda.yaml
+
+WriteLog "curl -d \""{\""name\"":\""0123456789\""}\"" -H \""Content-Type: application/json\""  -X POST   http://"$PublicDNSName"/"$functionName"/api/values"
+WriteLog "curl -H \""Content-Type: application/json\""  -X GET   http://"$PublicDNSName"/"$functionName"/api/test"
 
 WriteLog "Installation completed !" 
 

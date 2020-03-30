@@ -146,7 +146,7 @@ dockerfilepath='TestFunctionAppv3.1\Dockerfile'
 WriteLog "Installation script is starting for resource group: " $resourceGroupName " with prefixName: " $prefixName " cpuCores: " $cpuCores " memoryInGb: " $memoryInGb " AKS VM size: " $aksVMSize " AKS Node count: " $aksNodeCount
 WriteLog "Creating Azure Container Registry" 
 az deployment group create -g $resourceGroupName -n $acrDeploymentName --template-file azuredeploy.acr.json --parameter namePrefix=$prefixName --verbose -o json 
-az group deployment show -g $resourceGroupName -n $acrDeploymentName --query properties.outputs
+az deployment group show -g $resourceGroupName -n $acrDeploymentName --query properties.outputs
 
 WriteLog "Creating Service Principal with role acrpull" 
 az acr show --name $acrName --query id --output tsv > acrid.txt
@@ -179,7 +179,7 @@ az role assignment create --role Reader --assignee $acrSPAppId --scope $acrID
 
 WriteLog "Creating Azure Key Vault" 
 az deployment group create -g $resourceGroupName -n $akvDeploymentName --template-file azuredeploy.akv.json --parameter namePrefix=$prefixName objectId=$acrSPObjectId  appId=$acrSPAppId  password=$acrSPPassword --verbose -o json
-az group deployment show -g $resourceGroupName -n $akvDeploymentName --query properties.outputs
+az deployment group show -g $resourceGroupName -n $akvDeploymentName --query properties.outputs
 
 pullusr=$acrName'-pull-usr'
 pullpwd=$acrName'-pull-pwd'

@@ -38,15 +38,15 @@ This chapter describes how to deploy the rest API automatically on :</p>
 
 The following resources are available to complete this step:
 
-* **Linux Pre-requisite installation script: ** https://github.com/flecoqui/TestFunctionRestAPI/blob/master/install-software.sh </p>
-* **Windows Pre-requisite installation powershell script: ** https://github.com/flecoqui/TestFunctionRestAPI/blob/master/install-software-windows.ps1 </p>
-* **Azure Function ARM Template Linux: ** https://github.com/flecoqui/TestFunctionRestAPI/blob/master/azuredeploy.json </p>
-* **Linux Installation script for Function stored on Docker Hub and deployed on AKS: ** https://github.com/flecoqui/TestFunctionRestAPI/blob/master/install-aks-dockerhub-function.sh </p>
-* **Windows Installation script for Function stored on Docker Hub and deployed on AKS: ** https://github.com/flecoqui/TestFunctionRestAPI/blob/master/install-aks-dockerhub-function-windows.ps1 </p>
-* **Linux Installation script for Function stored on Azure Container Registry and deployed on AKS: ** https://github.com/flecoqui/TestFunctionRestAPI/blob/master/install-aks-acr-function.sh </p>
-* **Windows Installation script for Function stored on Azure Container Registry and deployed on AKS: ** https://github.com/flecoqui/TestFunctionRestAPI/blob/master/install-aks-acr-function-windows.ps1 </p>
-* **Linux Installation script for .Net Core 3.1 Web Api stored on Azure Container Registry and deployed on AKS: ** https://github.com/flecoqui/TestFunctionRestAPI/blob/master/install-aks-acr-webapi.sh </p>
-* **Windows Installation script for .Net Core 3.1 Web Api stored on Azure Container Registry and deployed on AKS: ** https://github.com/flecoqui/TestFunctionRestAPI/blob/master/install-aks-acr-webapi-windows.ps1 </p>
+* **Linux Pre-requisite installation script:** https://github.com/flecoqui/TestFunctionRestAPI/blob/master/install-software.sh </p>
+* **Windows Pre-requisite installation powershell script:** https://github.com/flecoqui/TestFunctionRestAPI/blob/master/install-software-windows.ps1 </p>
+* **Azure Function ARM Template Linux:** https://github.com/flecoqui/TestFunctionRestAPI/blob/master/azuredeploy.json </p>
+* **Linux Installation script for Function stored on Docker Hub and deployed on AKS:** https://github.com/flecoqui/TestFunctionRestAPI/blob/master/install-aks-dockerhub-function.sh </p>
+* **Windows Installation script for Function stored on Docker Hub and deployed on AKS:** https://github.com/flecoqui/TestFunctionRestAPI/blob/master/install-aks-dockerhub-function-windows.ps1 </p>
+* **Linux Installation script for Function stored on Azure Container Registry and deployed on AKS:** https://github.com/flecoqui/TestFunctionRestAPI/blob/master/install-aks-acr-function.sh </p>
+* **Windows Installation script for Function stored on Azure Container Registry and deployed on AKS:** https://github.com/flecoqui/TestFunctionRestAPI/blob/master/install-aks-acr-function-windows.ps1 </p>
+* **Linux Installation script for .Net Core 3.1 Web Api stored on Azure Container Registry and deployed on AKS:** https://github.com/flecoqui/TestFunctionRestAPI/blob/master/install-aks-acr-webapi.sh </p>
+* **Windows Installation script for .Net Core 3.1 Web Api stored on Azure Container Registry and deployed on AKS:** https://github.com/flecoqui/TestFunctionRestAPI/blob/master/install-aks-acr-webapi-windows.ps1 </p>
 
 
 ## PRE-REQUISITES

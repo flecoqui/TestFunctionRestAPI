@@ -35,7 +35,19 @@ Below a curl command line to retrieve the performance counters:
 This chapter describes how to deploy the rest API automatically on :</p>
 * **Azure Function**</p>
 * **Azure Kubernetes Service**</p>
-in **3 command lines**.
+
+The following resources are available to complete this step:
+
+* **Linux Pre-requisite installation script: ** https://github.com/flecoqui/TestFunctionRestAPI/blob/master/install-software.sh </p>
+* **Windows Pre-requisite installation powershell script: ** https://github.com/flecoqui/TestFunctionRestAPI/blob/master/install-software-windows.ps1 </p>
+* **Azure Function ARM Template Linux: ** https://github.com/flecoqui/TestFunctionRestAPI/blob/master/azuredeploy.json </p>
+* **Linux Installation script for Function stored on Docker Hub and deployed on AKS: ** https://github.com/flecoqui/TestFunctionRestAPI/blob/master/install-aks-dockerhub-function.sh </p>
+* **Windows Installation script for Function stored on Docker Hub and deployed on AKS: ** https://github.com/flecoqui/TestFunctionRestAPI/blob/master/install-aks-dockerhub-function-windows.ps1 </p>
+* **Linux Installation script for Function stored on Azure Container Registry and deployed on AKS: ** https://github.com/flecoqui/TestFunctionRestAPI/blob/master/install-aks-acr-function.sh </p>
+* **Windows Installation script for Function stored on Azure Container Registry and deployed on AKS: ** https://github.com/flecoqui/TestFunctionRestAPI/blob/master/install-aks-acr-function-windows.ps1 </p>
+* **Linux Installation script for .Net Core 3.1 Web Api stored on Azure Container Registry and deployed on AKS: ** https://github.com/flecoqui/TestFunctionRestAPI/blob/master/install-aks-acr-webapi.sh </p>
+* **Windows Installation script for .Net Core 3.1 Web Api stored on Azure Container Registry and deployed on AKS: ** https://github.com/flecoqui/TestFunctionRestAPI/blob/master/install-aks-acr-webapi-windows.ps1 </p>
+
 
 ## PRE-REQUISITES
 
@@ -310,19 +322,19 @@ For instance:
 Once the services are deployed, you can test the REST API using Curl. You can download curl from here https://curl.haxx.se/download.html 
 For instance for the Azure Function:
 
-     curl -d '{"name":"0123456789"}' -H "Content-Type: application/json"  -X POST   https://<namePrefix>function.azurewebsites.net/api/values
+     curl -d "{\"name\":\"0123456789\"}" -H "Content-Type: application/json"  -X POST   https://<namePrefix>function.azurewebsites.net/api/values
 
 For instance for the Function in a container with image stored on DockerHub:
 
-     curl -d '{"name":"0123456789"}' -H "Content-Type: application/json"  -X POST   http://<namePrefix>aks.<Region>.cloudapp.azure.com/<namePrefix>hubfunc/api/values
+     curl -d "{\"name\":\"0123456789\"}" -H "Content-Type: application/json"  -X POST   http://<namePrefix>aks.<Region>.cloudapp.azure.com/<namePrefix>hubfunc/api/values
 
 For instance for the Function in a container with image stored on Azure Container Registry:
 
-     curl -d '{"name":"0123456789"}' -H "Content-Type: application/json"  -X POST   http://<namePrefix>aks.<Region>.cloudapp.azure.com/<namePrefix>acrfunc/api/values
+     curl -d "{\"name\":\"0123456789\"}" -H "Content-Type: application/json"  -X POST   http://<namePrefix>aks.<Region>.cloudapp.azure.com/<namePrefix>acrfunc/api/values
 
 For instance for the .Net Core 3.1 WebAPI in a container with image stored on Azure Container Registry:
 
-     curl -d '{"name":"0123456789"}' -H "Content-Type: application/json"  -X POST   http://<namePrefix>aks.<Region>.cloudapp.azure.com/<namePrefix>acrwebapi/api/values
+     curl -d "{\"name\":\"0123456789\"}\" -H "Content-Type: application/json"  -X POST   http://<namePrefix>aks.<Region>.cloudapp.azure.com/<namePrefix>acrwebapi/api/values
 
 
 </p>
@@ -443,6 +455,4 @@ For instance:
    
 # Next Steps
 
-1. Complete the Linux installation script and Tests
-2. Add the support of Azure Container Registry for the AKS Deployment
-3. Add the support of https for the AKS Deployment
+1. Complete the Windows pre-requisite installation script 

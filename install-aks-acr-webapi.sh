@@ -223,7 +223,7 @@ count=$((count+1))
 #WriteLog "count"$count
 WriteLog "Waiting for Public IP address"
 sleep 15
-kubectl get services > services.txt
+kubectl get services -n ingress-nginx > services.txt
 # Public IP address of your ingress controller
 IP=$(Get-PublicIP ./services.txt)
 #WriteLog "ip"$IP

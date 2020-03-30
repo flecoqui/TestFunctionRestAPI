@@ -114,7 +114,7 @@ fi
 environ=`env`
 WriteLog "Environment before installation: $environ"
 
-WriteLog "Installation script is starting for resource group: $resourceGroupName with prefixName: $prefixName  AKS VM Size: $aksVMSize and AKS node count: $aksNodeCount
+WriteLog "Installation script is starting for resource group: $resourceGroupName with prefixName: $prefixName  AKS VM Size: $aksVMSize and AKS node count: $aksNodeCount"
 check_os
 if [ $iscentos -ne 0 ] && [ $isredhat -ne 0 ] && [ $isubuntu -ne 0 ] && [ $isdebian -ne 0 ];
 then

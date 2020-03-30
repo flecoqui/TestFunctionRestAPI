@@ -281,10 +281,10 @@ sed -i 's/<AKSDnsName>/'$PublicDNSName'/g' local_func.yaml
 kubectl apply -f local_func.yaml
 
 WriteLog "Deploying an Ingress resource pointing to prometheus server" 
-kubectl apply -f .\TestFunctionApp\ingress-prometheus.yaml
+kubectl apply -f ./TestFunctionApp/ingress-prometheus.yaml
 
 WriteLog "Deploying an Ingress resource pointing to the function" 
-sed 's/<FunctionName>/'$functionName'/g' ./TestFunctionApp/keda-prometheus.yaml > local_func.yaml
+sed 's/<FunctionName>/'$functionName'/g' ./TestFunctionApp/keda-prometheus.yaml > local_keda.yaml
 kubectl apply -f local_keda.yaml
 
 

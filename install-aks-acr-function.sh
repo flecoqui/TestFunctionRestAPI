@@ -257,7 +257,7 @@ WriteLog "Azure Container Registry login for : "$acrName
 az acr login --name $acrName
 WriteLog "Azure Container Registry Getting password for : "$acrName
 acrPassword=$(Get-FirstLine ./akvpassword.txt) 
-cd .\TestFunctionApp
+cd ./TestFunctionApp
 WriteLog "Creating the image for Azure Container Registry: "$acrName" with secret: "$acrPassword
 func kubernetes deploy --name function-$functionName --namespace ingress-nginx --service-type ClusterIP --registry $acrDNSName --pull-secret $acrPassword
 cd ..
@@ -267,10 +267,10 @@ sed -i 's/<AKSDnsName>/'$PublicDNSName'/g' local_func.yaml
 kubectl apply -f local_func.yaml
 
 WriteLog "Deploying an Ingress resource pointing to prometheus server" 
-kubectl apply -f .\TestFunctionApp\ingress-prometheus.yaml
+kubectl apply -f ./TestFunctionApp/ingress-prometheus.yaml
 
 WriteLog "Deploying an Ingress resource pointing to the function" 
-sed 's/<FunctionName>/'$functionName'/g' ./TestFunctionApp/keda-prometheus.yaml > local_func.yaml
+sed 's/<FunctionName>/'$functionName'/g' ./TestFunctionApp/keda-prometheus.yaml > local_keda.yaml
 kubectl apply -f local_keda.yaml
 
 

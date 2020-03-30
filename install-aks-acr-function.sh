@@ -123,6 +123,7 @@ then
 else
 functionName=$prefixName'acrfunc' 
 acrName=$prefixName'acr'
+acrDNSName=$acrName'.azurecr.io'
 acrDeploymentName=$prefixName'acrdep'
 acrSPName=$prefixName'acrsp'
 akvName=$prefixName'akv'

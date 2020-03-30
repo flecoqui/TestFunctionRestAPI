@@ -124,6 +124,7 @@ else
 # To be completed
 functionName=$prefixName'acrwebapi' 
 acrName=$prefixName'acr'
+acrDNSName=$acrName'.azurecr.io'
 acrDeploymentName=$prefixName'acrdep'
 acrSPName=$prefixName'acrsp'
 akvName=$prefixName'akv'

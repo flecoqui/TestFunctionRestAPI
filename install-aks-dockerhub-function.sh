@@ -134,6 +134,7 @@ acrDeploymentName=$prefixName'acrdep'
 acrSPName=$prefixName'acrsp'
 akvName=$prefixName'akv'
 aksName=$prefixName'aks'
+aksSPName=$prefixName'akssp'
 aksClusterName=$prefixName'akscluster'
 acrSPPassword=''
 acrSPAppId=''
@@ -153,7 +154,13 @@ dockerfilepath='TestFunctionAppv3.1\Dockerfile'
 
 
 WriteLog "Deploying a kubernetes cluster" 
-az aks create --resource-group $resourceGroupName --name $aksClusterName --dns-name-prefix $aksName --node-vm-size $aksVMSize   --node-count $aksNodeCount --generate-ssh-keys
+WriteLog "Creating Service Principal for AKS cluster" 
+az ad sp create-for-rbac --name http://$aksSPName --query password --output tsv > akssppassword.txt
+az ad sp show --id http://$aksSPName --query appId --output tsv > aksspappid.txt
+aksSPPassword=$(Get-FirstLine ./akssppassword.txt) 
+aksSPAppId=$(Get-FirstLine ./aksspappid.txt) 
+WriteLog "Creating AKS cluster" 
+az aks create --resource-group $resourceGroupName --name $aksClusterName --dns-name-prefix $aksName --node-vm-size $aksVMSize   --node-count $aksNodeCount --generate-ssh-keys --service-principal $aksSPAppId --client-secret $aksSPPassword
 az aks get-credentials --resource-group $resourceGroupName --name $aksClusterName --overwrite-existing 
 
 WriteLog "Deploying a Tiller" 

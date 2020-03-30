@@ -258,7 +258,7 @@ az acr login --name $acrName
 WriteLog "Azure Container Registry Getting password for : "$acrName
 acrPassword=$(Get-FirstLine ./akvpassword.txt) 
 cd .\TestFunctionApp
-WriteLog ("Creating the image for Azure Container Registry: " +  $acrName + " with secret: " + $acrPassword)
+WriteLog "Creating the image for Azure Container Registry: "$acrName" with secret: "$acrPassword
 func kubernetes deploy --name function-$functionName --namespace ingress-nginx --service-type ClusterIP --registry $acrDNSName --pull-secret $acrPassword
 cd ..
 WriteLog "Deploying an Ingress resource pointing to the function" 

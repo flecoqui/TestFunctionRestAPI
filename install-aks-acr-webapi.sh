@@ -288,7 +288,7 @@ sed 's/<FunctionName>/'$functionName'/g' ./TestFunctionApp/keda-prometheus.yaml 
 kubectl apply -f local_keda.yaml
 
 
-WriteLog "curl -d \"{\\\"name\\\":\\\"0123456789\\\"}\" -H \""Content-Type: application/json\""  -X POST   http://"$PublicDNSName"/"$functionName"/api/values"
+WriteLog "curl -d \"{\\\"name\\\":\\\"0123456789\\\"}\" -H \"Content-Type: application/json\"  -X POST   http://"$PublicDNSName"/"$functionName"/api/values"
 WriteLog "curl -H \"Content-Type: application/json\"  -X GET   http://"$PublicDNSName"/"$functionName"/api/test"
 
 

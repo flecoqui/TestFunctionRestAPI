@@ -19,11 +19,11 @@ $logdir = 'c:\git\log'
 function WriteLog($msg)
 {
 Write-Host $msg
-$msg >> $logdir + "\install-software-windows.log"
+$msg >> $logdir"\install-software-windows.log"
 }
 function WriteDateLog
 {
-date >> $logdir + "\install-software-windows.log"
+date >> $logdir"\install-software-windows.log"
 }
 function DownloadAndUnzip($sourceUrl,$DestinationDir ) 
 {
@@ -124,7 +124,8 @@ else
 	WriteLog "node-v12.16.1-x64.msi copied" 
 }
 WriteLog "Installing NodeJS" 
-msiexec.exe /i $sourcedir + "\node-v12.16.1-x64.msi" /qn /l* $logdir + "\node-install.log"
+msiexec.exe /i $sourcedir"\node-v12.16.1-x64.msi" /qn /l* $logdir"\node-install.log"
+$Env:path += ";c:\Program Files\nodejs"
 
 
 WriteDateLog
@@ -146,17 +147,26 @@ else
 	WriteLog "Git-2.26.0-32-bit.exe copied" 
 }
 WriteLog "Installing Git" 
-$sourcedir + "\Git-2.26.0-32-bit.exe" /VERYSILENT
+Start-Process -FilePath $sourcedir"\Git-2.26.0-32-bit.exe" -Wait -ArgumentList "/VERYSILENT","/SUPPRESSMSGBOXES","/NORESTART","/NOCANCEL","/SP-","/LOG"
 
+$count=0
+while ((!(Test-Path "C:\Program Files\Git\bin\git.exe"))-and($count -lt 20)) { Start-Sleep 10; $count++}
 
+WriteLog "git Installed" 
 
 WriteDateLog
 WriteLog ("Installing Azure CLI")
 Invoke-WebRequest -Uri https://aka.ms/installazurecliwindows -OutFile .\AzureCLI.msi; Start-Process msiexec.exe -Wait -ArgumentList '/I AzureCLI.msi /quiet'; rm .\AzureCLI.msi
-
+$Env:path += ";C:\Program Files (x86)\Microsoft SDKs\Azure\CLI2\wbin"
 WriteDateLog
 WriteLog ("Installing kubectl")
-az aks install-cli
+#az aks install-cli
+#Start-Process -FilePath "az" -Wait -ArgumentList "aks","install-cli"
+$output = az aks install-cli | ConvertFrom-Json
+if (!$output) {
+    writeLog "Error or Warning while installing kubectl"
+}
+$Env:path += ";"+$Env:USERPROFILE+"\.azure-kubectl"
 
 WriteDateLog
 WriteLog "Downloading Helm" 
@@ -177,12 +187,15 @@ else
 	WriteLog "helm-v3.1.2-windows-amd64.zip copied" 
 }
 WriteLog ("Installing Helm")
-Expand-ZIPFile $sourcedir+"\helm-v3.1.2-windows-amd64.zip" $helmdir
+Expand-ZIPFile $sourcedir"\helm-v3.1.2-windows-amd64.zip" $helmdir
 $Env:path += ";"+$helmdir+"\windows-amd64"
-
+$Env:path += ";C:\Program Files (x86)\Microsoft SDKs\Azure\CLI2\wbin"
 WriteDateLog
 WriteLog ("Installing Azure Function Tools")
-npm i -g azure-functions-core-tools@3 --unsafe-perm true
+#npm i -g azure-functions-core-tools@3 --unsafe-perm true
+#Start-Process -FilePath "npm" -Wait -ArgumentList "i","-g","azure-functions-core-tools@3","--unsafe-perm","true"
+$output = npm i -g azure-functions-core-tools@3 --unsafe-perm true | ConvertFrom-Json
+
 
 WriteDateLog
 WriteLog "Downloading Docker" 
@@ -203,7 +216,7 @@ else
 	WriteLog "DockerDesktop.msi copied" 
 }
 WriteLog "Installing Docker" 
-Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V -All
-Enable-WindowsOptionalFeature -Online -FeatureName Containers -All
-msiexec.exe /i $sourcedir+"\DockerDesktop.msi" /qn /l* $logdir + "\docker-install.log"
-
+#Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V -All
+#Enable-WindowsOptionalFeature -Online -FeatureName Containers -All
+msiexec.exe /i $sourcedir"\DockerDesktop.msi" /qn /l* $logdir"\docker-install.log"
+WriteLog "Docker Installed" 

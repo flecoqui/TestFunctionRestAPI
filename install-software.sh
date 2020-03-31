@@ -1,7 +1,13 @@
 #!/bin/bash
-# This bash file install apache
-# Parameter 1 hostname 
-azure_hostname=$1
+# This bash file install the pre-requisites:
+# - git
+# - azure Cli
+# - kubectl
+# - helm
+# - azure function tools
+# - docker
+#		
+#
 #############################################################################
 log()
 {

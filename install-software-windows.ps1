@@ -1,181 +1,209 @@
+#usage install-software-windows.ps1 
+# This Power Shell file install the pre-requisites:
+# - git
+# - azure Cli
+# - kubectl
+# - helm
+# - azure function tools
+# - docker
+#		
+#
+mkdir c:\git
+mkdir c:\git\log
+mkdir c:\git\download
+mkdir c:\git\helm
+$sourcedir = 'c:\git\download' 
+$helmdir = 'c:\git\helm' 
+$logdir = 'c:\git\log' 
 
-#usage install-aks-dockerhub-windows.ps1 
-
-param
-(
-      [string]$resourceGroupName = $null,
-      [string]$prefixName = $null,
-      [string]$aksVMSize = $null,
-      [string]$aksNodeCount = $null,
-      [string]$dockerHubAccountName = $null
-
-)
 function WriteLog($msg)
 {
 Write-Host $msg
-$msg >> install-aks-dockerhub-function-windows.log
+$msg >> $logdir + "\install-software-windows.log"
 }
-
-if($prefixName -eq $null) {
-     WriteLog "Installation failed prefixName parameter not set "
-     throw "Installation failed prefixName parameter not set "
-}
-if($resourceGroupName -eq $null) {
-     WriteLog "Installation failed resourceGroupName parameter not set "
-     throw "Installation failed resourceGroupName parameter not set "
-}
-if($dockerHubAccountName -eq $null) {
-     WriteLog "Installation failed Docker Hub Account Name parameter not set "
-     throw "Installation failed Docker Hub Account Name parameter not set "
-}
-if($aksVMSize -eq $null) {
-     $aksVMSize=Standard_D2_v2
-}
-if($aksNodeCount -eq $null) {
-     $aksNodeCount=1
-}
-if($dockerHubAccountName -eq $null) {
-     $dockerHubAccountName='flecoqui'
-}
-# WARNING As the image name of the function must be different between DockerHub image and Azure Container Registry image
-# The function name are different for DockerHub  function name and Container Registry function name
-$functionName = $prefixName + 'hubfunc' 
-$acrName = $prefixName + 'acr'
-$acrDeploymentName = $prefixName + 'acrdep'
-$acrSPName = $prefixName + 'acrsp'
-$akvName = $prefixName + 'akv'
-$aksName = $prefixName + 'aks'
-$aksClusterName = $prefixName + 'akscluster'
-$acrSPPassword = ''
-$acrSPAppId = ''
-$acrSPObjectId = ''
-$akvDeploymentName = $prefixName + 'akvdep'
-$aciDeploymentName = $prefixName + 'acidep'
-$aksDeploymentName = $prefixName + 'aksdep'
-$imageName = 'function-' + $functionName
-$imageNameId = $imageName + ':{{.Run.ID}}'
-$imageTag = 'latest'
-$latestImageName = $imageName+ ':' + $imageTag
-$imageTask =  $imageName + 'task'
-$githubrepo = 'https://github.com/flecoqui/TestFunctionRestAPI.git'
-$githubbranch = 'master'
-$dockerfilepath = 'TestFunctionAppv3.1\Dockerfile'
-
-
-function WriteLog($msg)
+function WriteDateLog
 {
-    Write-Host $msg
-    $msg >> install-aks-windows.log
+date >> $logdir + "\install-software-windows.log"
 }
-function Get-Password($file)
+function DownloadAndUnzip($sourceUrl,$DestinationDir ) 
 {
-    foreach($line in (Get-Content $file  ))
+    $TempPath = [System.IO.Path]::GetTempFileName()
+    if (($sourceUrl -as [System.URI]).AbsoluteURI -ne $null)
     {
-	    $nline = $line.Split(':", ',[System.StringSplitOptions]::RemoveEmptyEntries)
-	    if($nline.Length -gt 1) 
-	    {
-  	    if($nline[0] -eq "password")
-  	        {
-		        return $nline[1]
-      		        break
-  	        }
-  	    }
+        $handler = New-Object System.Net.Http.HttpClientHandler
+        $client = New-Object System.Net.Http.HttpClient($handler)
+        $client.Timeout = New-Object System.TimeSpan(0, 30, 0)
+        $cancelTokenSource = [System.Threading.CancellationTokenSource]::new()
+        $responseMsg = $client.GetAsync([System.Uri]::new($sourceUrl), $cancelTokenSource.Token)
+        $responseMsg.Wait()
+        if (!$responseMsg.IsCanceled)
+        {
+            $response = $responseMsg.Result
+            if ($response.IsSuccessStatusCode)
+            {
+                $downloadedFileStream = [System.IO.FileStream]::new($TempPath, [System.IO.FileMode]::Create, [System.IO.FileAccess]::Write)
+                $copyStreamOp = $response.Content.CopyToAsync($downloadedFileStream)
+                $copyStreamOp.Wait()
+                $downloadedFileStream.Close()
+                if ($copyStreamOp.Exception -ne $null)
+                {
+                    throw $copyStreamOp.Exception
+                }
+            }
+        }
     }
-    return $null
-}
-function Get-PublicIP($file)
-{
-    foreach($line in (Get-Content $file  ))
+    else
     {
-	    $nline = $line.Split(' ',[System.StringSplitOptions]::RemoveEmptyEntries)
-	    if($nline.Length -gt 3) 
-	    {
-  	    if($nline[1] -eq "LoadBalancer")
-  	        {
-		        return $nline[3]
-      		        break
-  	        }
-  	    }
+        throw "Cannot copy from $sourceUrl"
     }
-    return $null
+    [System.IO.Compression.ZipFile]::ExtractToDirectory($TempPath, $DestinationDir)
+    Remove-Item $TempPath
 }
-WriteLog ("Installation script is starting for resource group: " + $resourceGroupName + " with prefixName: " + $prefixName + " AKS VM size: " + $aksVMSize + " AKS Node count: " + $aksNodeCount + " Docker Hub Account Name : " + $dockerHubAccountName)
-WriteLog "Deploying a kubernetes cluster" 
-#az aks create --resource-group $resourceGroupName --name $aksClusterName --dns-name-prefix $aksName --node-vm-size $aksVMSize   --node-count $aksNodeCount --service-principal $acrSPAppId   --client-secret $acrSPPassword --generate-ssh-keys
-az aks create --resource-group $resourceGroupName --name $aksClusterName --dns-name-prefix $aksName --node-vm-size $aksVMSize   --node-count $aksNodeCount --generate-ssh-keys
-az aks get-credentials --resource-group $resourceGroupName --name $aksClusterName --overwrite-existing 
-
-WriteLog "Deploying a Tiller" 
-kubectl --namespace kube-system create serviceaccount tiller
-kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
-
-WriteLog "Preparing Helm repository" 
-helm repo add stable https://kubernetes-charts.storage.googleapis.com/
-helm repo add kedacore https://kedacore.github.io/charts
-
-WriteLog "Creating the name space" 
-kubectl create namespace ingress-nginx
-
-WriteLog "Deploying nginx Ingress controller with Helm" 
-helm install ingress-controller stable/nginx-ingress --namespace ingress-nginx --set controller.replicaCount=2 --set controller.metrics.enabled=true --set controller.podAnnotations."prometheus\.io/scrape"="true" --set controller.podAnnotations."prometheus\.io/port"="10254"
-
-WriteLog "Waiting for Public IP address during 10 minutes max" 
-$count = 0
-Do
+function Download($sourceUrl,$DestinationDir ) 
 {
-$count = $count+1
-WriteLog "Waiting for Public IP address" 
-Start-Sleep -s 15
-kubectl get services -n ingress-nginx > services.txt 
-# Public IP address of your ingress controller
-$IP  = Get-PublicIP .\services.txt 
-}While ((($IP -eq '<pending>') -or ($IP -eq $null)) -and ($count -lt 40))
-
-if (($IP -eq '<pending>') -or ($IP -eq $null)){
-	 WriteLog "Can't get the public IP address for container, stopping the installation"
-     throw "Can't get the public IP address for container, stopping the installation"
+    $TempPath = [System.IO.Path]::GetTempFileName()
+    if (($sourceUrl -as [System.URI]).AbsoluteURI -ne $null)
+    {
+        $handler = New-Object System.Net.Http.HttpClientHandler
+        $client = New-Object System.Net.Http.HttpClient($handler)
+        $client.Timeout = New-Object System.TimeSpan(0, 30, 0)
+        $cancelTokenSource = [System.Threading.CancellationTokenSource]::new()
+        $responseMsg = $client.GetAsync([System.Uri]::new($sourceUrl), $cancelTokenSource.Token)
+        $responseMsg.Wait()
+        if (!$responseMsg.IsCanceled)
+        {
+            $response = $responseMsg.Result
+            if ($response.IsSuccessStatusCode)
+            {
+                $downloadedFileStream = [System.IO.FileStream]::new($TempPath, [System.IO.FileMode]::Create, [System.IO.FileAccess]::Write)
+                $copyStreamOp = $response.Content.CopyToAsync($downloadedFileStream)
+                $copyStreamOp.Wait()
+                $downloadedFileStream.Close()
+                if ($copyStreamOp.Exception -ne $null)
+                {
+                    throw $copyStreamOp.Exception
+                }
+            }
+        }
+    }
+    else
+    {
+        throw "Cannot copy from $sourceUrl"
+    }
+    [System.IO.Compression.ZipFile]::ExtractToDirectory($TempPath, $DestinationDir)
+    Remove-Item $TempPath
 }
-WriteLog ("Public IP address: " + $IP) 
+function Expand-ZIPFile($file, $destination) 
+{ 
+    $shell = new-object -com shell.application 
+    $zip = $shell.NameSpace($file) 
+    foreach($item in $zip.items()) 
+    { 
+        # Unzip the file with 0x14 (overwrite silently) 
+        $shell.Namespace($destination).copyhere($item, 0x14) 
+    } 
+} 
 
-# Name to associate with public IP address
-$dnsName=$aksName
 
-# Get the resource-id of the public ip
-$PublicIPId=$(az network public-ip list --query "[?ipAddress!=null]|[?contains(ipAddress, '$IP')].[id]" --output tsv)
-WriteLog ("Public IP address ID: " + $PublicIPId) 
+WriteDateLog
+WriteLog "Downloading NodeJS" 
+$url = 'https://nodejs.org/dist/v12.16.1/node-v12.16.1-x64.msi' 
+$EditionId = (Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' -Name 'EditionID').EditionId
+if (($EditionId -eq "ServerStandardNano") -or
+    ($EditionId -eq "ServerDataCenterNano") -or
+    ($EditionId -eq "NanoServer") -or
+    ($EditionId -eq "ServerTuva")) {
+	Download $url $sourcedir 
+	WriteLog "node-v12.16.1-x64.msi copied" 
+}
+else
+{
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+	$webClient = New-Object System.Net.WebClient  
+	$webClient.DownloadFile($url,$sourcedir + "\node-v12.16.1-x64.msi" )  
+	WriteLog "node-v12.16.1-x64.msi copied" 
+}
+WriteLog "Installing NodeJS" 
+msiexec.exe /i $sourcedir + "\node-v12.16.1-x64.msi" /qn /l* $logdir + "\node-install.log"
 
-# Update public ip address with DNS name
-az network public-ip update --ids $PublicIPId --dns-name $dnsName
-# get the full dns name
-$PublicDNSName=$(az network public-ip list --query "[?ipAddress!=null]|[?contains(ipAddress, '$IP')].[dnsSettings.fqdn]" --output tsv)
-WriteLog ("Public DNS Name: " +$PublicDNSName) 
 
-WriteLog "Deploying Prometheus to monitor nginx Ingress controller" 
-kubectl apply --kustomize github.com/kubernetes/ingress-nginx/deploy/prometheus/ 
-kubectl -n ingress-nginx get svc
-kubectl -n ingress-nginx get pods
+WriteDateLog
+WriteLog "Downloading Git" 
+$url = 'https://github.com/git-for-windows/git/releases/download/v2.26.0.windows.1/Git-2.26.0-32-bit.exe' 
+$EditionId = (Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' -Name 'EditionID').EditionId
+if (($EditionId -eq "ServerStandardNano") -or
+    ($EditionId -eq "ServerDataCenterNano") -or
+    ($EditionId -eq "NanoServer") -or
+    ($EditionId -eq "ServerTuva")) {
+	Download $url $sourcedir 
+	WriteLog "Git-2.26.0-32-bit.exe copied" 
+}
+else
+{
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+	$webClient = New-Object System.Net.WebClient  
+	$webClient.DownloadFile($url,$sourcedir + "\Git-2.26.0-32-bit.exe" )  
+	WriteLog "Git-2.26.0-32-bit.exe copied" 
+}
+WriteLog "Installing Git" 
+$sourcedir + "\Git-2.26.0-32-bit.exe" /VERYSILENT
 
-WriteLog "Deploying Keda with Helm" 
-helm install keda kedacore/keda --namespace ingress-nginx
-kubectl get pods -n ingress-nginx
 
-WriteLog "Creating Function App image and deploying it" 
-cd .\TestFunctionApp
-# func init --docker-only
-func kubernetes deploy --name function-$functionName --namespace ingress-nginx --service-type ClusterIP --registry $dockerHubAccountName
-cd ..
-WriteLog "Deploying an Ingress resource pointing to the function" 
-get-content .\TestFunctionApp\testfunctionapp.yaml | %{$_ -replace "<FunctionName>",$functionName} | %{$_ -replace "<AKSDnsName>",$PublicDNSName} > local_func.yaml
-kubectl apply -f local_func.yaml
 
-WriteLog "Deploying an Ingress resource pointing to prometheus server" 
-kubectl apply -f .\TestFunctionApp\ingress-prometheus.yaml
+WriteDateLog
+WriteLog ("Installing Azure CLI")
+Invoke-WebRequest -Uri https://aka.ms/installazurecliwindows -OutFile .\AzureCLI.msi; Start-Process msiexec.exe -Wait -ArgumentList '/I AzureCLI.msi /quiet'; rm .\AzureCLI.msi
 
-WriteLog "Deploying an Ingress resource pointing to the function" 
-get-content .\TestFunctionApp\keda-prometheus.yaml | %{$_ -replace "<FunctionName>",$functionName}  > local_keda.yaml
-kubectl apply -f local_keda.yaml
+WriteDateLog
+WriteLog ("Installing kubectl")
+az aks install-cli
 
-writelog ("curl -d ""{\""name\"":\""0123456789\""}"" -H ""Content-Type: application/json""  -X POST   http://" + $PublicDNSName + "/" + $functionName + "/api/values")
-writelog ("curl -H ""Content-Type: application/json""  -X GET   http://" + $PublicDNSName + "/" + $functionName + "/api/test")
-WriteLog "Installation completed !" 
+WriteDateLog
+WriteLog "Downloading Helm" 
+$url = 'https://get.helm.sh/helm-v3.1.2-windows-amd64.zip' 
+$EditionId = (Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' -Name 'EditionID').EditionId
+if (($EditionId -eq "ServerStandardNano") -or
+    ($EditionId -eq "ServerDataCenterNano") -or
+    ($EditionId -eq "NanoServer") -or
+    ($EditionId -eq "ServerTuva")) {
+	Download $url $sourcedir 
+	WriteLog "helm-v3.1.2-windows-amd64.zip copied" 
+}
+else
+{
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+	$webClient = New-Object System.Net.WebClient  
+	$webClient.DownloadFile($url,$sourcedir + "\helm-v3.1.2-windows-amd64.zip" )  
+	WriteLog "helm-v3.1.2-windows-amd64.zip copied" 
+}
+WriteLog ("Installing Helm")
+Expand-ZIPFile $sourcedir+"\helm-v3.1.2-windows-amd64.zip" $helmdir
+$Env:path += ";"+$helmdir+"\windows-amd64"
+
+WriteDateLog
+WriteLog ("Installing Azure Function Tools")
+npm i -g azure-functions-core-tools@3 --unsafe-perm true
+
+WriteDateLog
+WriteLog "Downloading Docker" 
+$url = 'https://download.docker.com/win/enterprise/DockerDesktop.msi' 
+$EditionId = (Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' -Name 'EditionID').EditionId
+if (($EditionId -eq "ServerStandardNano") -or
+    ($EditionId -eq "ServerDataCenterNano") -or
+    ($EditionId -eq "NanoServer") -or
+    ($EditionId -eq "ServerTuva")) {
+	Download $url $sourcedir 
+	WriteLog "DockerDesktop.msi copied" 
+}
+else
+{
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+	$webClient = New-Object System.Net.WebClient  
+	$webClient.DownloadFile($url,$sourcedir + "\DockerDesktop.msi" )  
+	WriteLog "DockerDesktop.msi copied" 
+}
+WriteLog "Installing Docker" 
+Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V -All
+Enable-WindowsOptionalFeature -Online -FeatureName Containers -All
+msiexec.exe /i $sourcedir+"\DockerDesktop.msi" /qn /l* $logdir + "\docker-install.log"
 

@@ -1,0 +1,1154 @@
+C:\Users\flecoqui>kubectl get services --all-namespaces
+NAMESPACE       NAME                                                  TYPE           CLUSTER-IP     EXTERNAL-IP    PORT(S)                      AGE
+default         kubernetes                                            ClusterIP      10.0.0.1       <none>         443/TCP                      42h
+ingress-nginx   function-testrestapiacrwebapi-http                    ClusterIP      10.0.210.7     <none>         80/TCP                       42h
+ingress-nginx   ingress-controller-nginx-ingress-controller           LoadBalancer   10.0.162.125   40.70.165.64   80:32449/TCP,443:32104/TCP   42h
+ingress-nginx   ingress-controller-nginx-ingress-controller-metrics   ClusterIP      10.0.0.223     <none>         9913/TCP                     42h
+ingress-nginx   ingress-controller-nginx-ingress-default-backend      ClusterIP      10.0.205.129   <none>         80/TCP                       42h
+ingress-nginx   keda-operator-metrics                                 ClusterIP      10.0.203.239   <none>         8383/TCP,8686/TCP            42h
+ingress-nginx   keda-operator-metrics-apiserver                       ClusterIP      10.0.226.7     <none>         443/TCP,80/TCP               42h
+ingress-nginx   prometheus-server                                     NodePort       10.0.54.117    <none>         9090:30855/TCP               42h
+kube-system     healthmodel-replicaset-service                        ClusterIP      10.0.140.221   <none>         25227/TCP                    42h
+kube-system     kube-dns                                              ClusterIP      10.0.0.10      <none>         53/UDP,53/TCP                42h
+kube-system     kubernetes-dashboard                                  ClusterIP      10.0.58.181    <none>         80/TCP                       42h
+kube-system     metrics-server                                        ClusterIP      10.0.110.190   <none>         443/TCP                      42h
+
+C:\Users\flecoqui>kubectl get service function-testrestapiacrwebapi-http -n ingress-nginx -o yaml
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"v1","kind":"Service","metadata":{"annotations":{},"name":"function-testrestapiacrwebapi-http","namespace":"ingress-nginx"},"spec":{"ports":[{"port":80,"protocol":"TCP","targetPort":80}],"selector":{"app":"function-testrestapiacrwebapi-http"},"sessionAffinity":"None","type":"ClusterIP"}}
+  creationTimestamp: "2020-03-31T12:00:18Z"
+  name: function-testrestapiacrwebapi-http
+  namespace: ingress-nginx
+  resourceVersion: "1478"
+  selfLink: /api/v1/namespaces/ingress-nginx/services/function-testrestapiacrwebapi-http
+  uid: a7dc12f9-1f09-451f-b5fc-4b1162256c6c
+spec:
+  clusterIP: 10.0.210.7
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: function-testrestapiacrwebapi-http
+  sessionAffinity: None
+  type: ClusterIP
+status:
+  loadBalancer: {}
+
+C:\Users\flecoqui>kubectl get service ingress-controller-nginx-ingress-controller -n ingress-nginx -o yaml
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: "2020-03-31T11:57:36Z"
+  labels:
+    app: nginx-ingress
+    chart: nginx-ingress-1.34.3
+    component: controller
+    heritage: Helm
+    release: ingress-controller
+  name: ingress-controller-nginx-ingress-controller
+  namespace: ingress-nginx
+  resourceVersion: "1115"
+  selfLink: /api/v1/namespaces/ingress-nginx/services/ingress-controller-nginx-ingress-controller
+  uid: f172a05f-e79b-492e-bdd8-896040071448
+spec:
+  clusterIP: 10.0.162.125
+  externalTrafficPolicy: Cluster
+  ports:
+  - name: http
+    nodePort: 32449
+    port: 80
+    protocol: TCP
+    targetPort: http
+  - name: https
+    nodePort: 32104
+    port: 443
+    protocol: TCP
+    targetPort: https
+  selector:
+    app: nginx-ingress
+    app.kubernetes.io/component: controller
+    release: ingress-controller
+  sessionAffinity: None
+  type: LoadBalancer
+status:
+  loadBalancer:
+    ingress:
+    - ip: 40.70.165.64
+
+C:\Users\flecoqui>kubectl get service ingress-controller-nginx-ingress-controller-metrics -n ingress-nginx -o yaml
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: "2020-03-31T11:57:36Z"
+  labels:
+    app: nginx-ingress
+    chart: nginx-ingress-1.34.3
+    component: controller
+    heritage: Helm
+    release: ingress-controller
+  name: ingress-controller-nginx-ingress-controller-metrics
+  namespace: ingress-nginx
+  resourceVersion: "1010"
+  selfLink: /api/v1/namespaces/ingress-nginx/services/ingress-controller-nginx-ingress-controller-metrics
+  uid: a2549ae0-86bc-47ca-abf6-f691bec8ccb4
+spec:
+  clusterIP: 10.0.0.223
+  ports:
+  - name: metrics
+    port: 9913
+    protocol: TCP
+    targetPort: metrics
+  selector:
+    app: nginx-ingress
+    app.kubernetes.io/component: controller
+    release: ingress-controller
+  sessionAffinity: None
+  type: ClusterIP
+status:
+  loadBalancer: {}
+
+C:\Users\flecoqui>kubectl get service ingress-controller-nginx-ingress-default-backend -n ingress-nginx -o yaml
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: "2020-03-31T11:57:36Z"
+  labels:
+    app: nginx-ingress
+    chart: nginx-ingress-1.34.3
+    component: default-backend
+    heritage: Helm
+    release: ingress-controller
+  name: ingress-controller-nginx-ingress-default-backend
+  namespace: ingress-nginx
+  resourceVersion: "1007"
+  selfLink: /api/v1/namespaces/ingress-nginx/services/ingress-controller-nginx-ingress-default-backend
+  uid: fb9ff24a-f57b-4a0a-bd84-fefb4cda808f
+spec:
+  clusterIP: 10.0.205.129
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: http
+  selector:
+    app: nginx-ingress
+    app.kubernetes.io/component: default-backend
+    release: ingress-controller
+  sessionAffinity: None
+  type: ClusterIP
+status:
+  loadBalancer: {}
+
+
+
+
+C:\Users\flecoqui>kubectl get service keda-operator-metrics -n ingress-nginx -o yaml
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: "2020-03-31T12:00:13Z"
+  labels:
+    name: keda-operator
+  name: keda-operator-metrics
+  namespace: ingress-nginx
+  ownerReferences:
+  - apiVersion: apps/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: Deployment
+    name: keda-operator
+    uid: 9773d28e-1e85-4a69-b633-3d646469cfad
+  resourceVersion: "1452"
+  selfLink: /api/v1/namespaces/ingress-nginx/services/keda-operator-metrics
+  uid: c2ecc752-0bc6-4b27-8e23-f18add761b26
+spec:
+  clusterIP: 10.0.203.239
+  ports:
+  - name: http-metrics
+    port: 8383
+    protocol: TCP
+    targetPort: 8383
+  - name: cr-metrics
+    port: 8686
+    protocol: TCP
+    targetPort: 8686
+  selector:
+    name: keda-operator
+  sessionAffinity: None
+  type: ClusterIP
+status:
+  loadBalancer: {}
+
+
+
+C:\Users\flecoqui>kubectl get service keda-operator-metrics-apiserver -n ingress-nginx -o yaml
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: "2020-03-31T11:59:56Z"
+  labels:
+    app.kubernetes.io/instance: keda
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: keda-operator-metrics-apiserver
+    app.kubernetes.io/part-of: keda-operator
+    app.kubernetes.io/version: 1.3.0
+  name: keda-operator-metrics-apiserver
+  namespace: ingress-nginx
+  resourceVersion: "1375"
+  selfLink: /api/v1/namespaces/ingress-nginx/services/keda-operator-metrics-apiserver
+  uid: c00974c7-3e00-44b9-a296-e538d24f08ae
+spec:
+  clusterIP: 10.0.226.7
+  ports:
+  - name: https
+    port: 443
+    protocol: TCP
+    targetPort: 6443
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: keda-operator-metrics-apiserver
+  sessionAffinity: None
+  type: ClusterIP
+status:
+  loadBalancer: {}
+
+
+C:\Users\flecoqui>kubectl get service prometheus-server -n ingress-nginx -o yaml
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"v1","kind":"Service","metadata":{"annotations":{},"labels":{"app.kubernetes.io/name":"prometheus","app.kubernetes.io/part-of":"ingress-nginx"},"name":"prometheus-server","namespace":"ingress-nginx"},"spec":{"ports":[{"port":9090,"targetPort":9090}],"selector":{"app.kubernetes.io/name":"prometheus","app.kubernetes.io/part-of":"ingress-nginx"},"type":"NodePort"}}
+  creationTimestamp: "2020-03-31T11:59:36Z"
+  labels:
+    app.kubernetes.io/name: prometheus
+    app.kubernetes.io/part-of: ingress-nginx
+  name: prometheus-server
+  namespace: ingress-nginx
+  resourceVersion: "1300"
+  selfLink: /api/v1/namespaces/ingress-nginx/services/prometheus-server
+  uid: 3d9753a8-4f4f-4ce5-93ea-6f51df109323
+spec:
+  clusterIP: 10.0.54.117
+  externalTrafficPolicy: Cluster
+  ports:
+  - nodePort: 30855
+    port: 9090
+    protocol: TCP
+    targetPort: 9090
+  selector:
+    app.kubernetes.io/name: prometheus
+    app.kubernetes.io/part-of: ingress-nginx
+  sessionAffinity: None
+  type: NodePort
+status:
+  loadBalancer: {}
+
+C:\Users\flecoqui>kubectl get pods -n ingress-nginx
+NAME                                                              READY   STATUS    RESTARTS   AGE
+function-testrestapiacrwebapi-http-6db747597c-hn276               1/1     Running   1          43h
+ingress-controller-nginx-ingress-controller-5bb68d7957-9t7tx      1/1     Running   2          44h
+ingress-controller-nginx-ingress-controller-5bb68d7957-c6n5v      1/1     Running   2          44h
+ingress-controller-nginx-ingress-default-backend-7cdd9c96fxdqjw   1/1     Running   1          44h
+keda-operator-6bdf8cbb68-l5pdf                                    1/1     Running   2          43h
+keda-operator-metrics-apiserver-78cd458bf-zx6qs                   1/1     Running   2          43h
+prometheus-server-7f56b89f78-dg5qc                                1/1     Running   1          43h
+
+
+C:\Users\flecoqui>kubectl get pod function-testrestapiacrwebapi-http-6db747597c-hn276 -n ingress-nginx -o yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: "2020-03-31T12:00:18Z"
+  generateName: function-testrestapiacrwebapi-http-6db747597c-
+  labels:
+    app: function-testrestapiacrwebapi-http
+    pod-template-hash: 6db747597c
+  name: function-testrestapiacrwebapi-http-6db747597c-hn276
+  namespace: ingress-nginx
+  ownerReferences:
+  - apiVersion: apps/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: ReplicaSet
+    name: function-testrestapiacrwebapi-http-6db747597c
+    uid: 7c755c83-c0f6-4c98-99c2-ca290c979cf0
+  resourceVersion: "95702"
+  selfLink: /api/v1/namespaces/ingress-nginx/pods/function-testrestapiacrwebapi-http-6db747597c-hn276
+  uid: eb06ce09-ff5b-4708-8e91-73b19046a7c4
+spec:
+  containers:
+  - image: testrestapiacr.azurecr.io/function-testrestapiacrwebapi
+    imagePullPolicy: Always
+    name: function-testrestapiacrwebapi-http
+    ports:
+    - containerPort: 80
+      protocol: TCP
+    resources: {}
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: default-token-crj4m
+      readOnly: true
+  dnsPolicy: ClusterFirst
+  enableServiceLinks: true
+  imagePullSecrets:
+  - name: dae6b648-66cc-491f-ab6f-ab9b9dc0b8e5
+  nodeName: aks-nodepool1-73500938-vmss000000
+  priority: 0
+  restartPolicy: Always
+  schedulerName: default-scheduler
+  securityContext: {}
+  serviceAccount: default
+  serviceAccountName: default
+  terminationGracePeriodSeconds: 30
+  tolerations:
+  - effect: NoExecute
+    key: node.kubernetes.io/not-ready
+    operator: Exists
+    tolerationSeconds: 300
+  - effect: NoExecute
+    key: node.kubernetes.io/unreachable
+    operator: Exists
+    tolerationSeconds: 300
+  volumes:
+  - name: default-token-crj4m
+    secret:
+      defaultMode: 420
+      secretName: default-token-crj4m
+status:
+  conditions:
+  - lastProbeTime: null
+    lastTransitionTime: "2020-03-31T12:00:18Z"
+    status: "True"
+    type: Initialized
+  - lastProbeTime: null
+    lastTransitionTime: "2020-04-01T06:51:13Z"
+    status: "True"
+    type: Ready
+  - lastProbeTime: null
+    lastTransitionTime: "2020-04-01T06:51:13Z"
+    status: "True"
+    type: ContainersReady
+  - lastProbeTime: null
+    lastTransitionTime: "2020-03-31T12:00:18Z"
+    status: "True"
+    type: PodScheduled
+  containerStatuses:
+  - containerID: docker://c2fc5a74251f42966526270b667019a35daf1643e30328be864068a636eb3236
+    image: testrestapiacr.azurecr.io/function-testrestapiacrwebapi:latest
+    imageID: docker-pullable://testrestapiacr.azurecr.io/function-testrestapiacrwebapi@sha256:f6467e1a0d4b29c5631c77ffb34ce4e74346d1121c6fd823e80380485e19e9ed
+    lastState:
+      terminated:
+        containerID: docker://425ab4b45dd5e8a5de8ab7a608670c6da6dfd2f8e94305bfb79748656f315fd0
+        exitCode: 255
+        finishedAt: "2020-04-01T06:50:38Z"
+        reason: Error
+        startedAt: "2020-03-31T12:00:33Z"
+    name: function-testrestapiacrwebapi-http
+    ready: true
+    restartCount: 1
+    state:
+      running:
+        startedAt: "2020-04-01T06:51:12Z"
+  hostIP: 10.240.0.4
+  phase: Running
+  podIP: 10.244.2.14
+  qosClass: BestEffort
+  startTime: "2020-03-31T12:00:18Z"
+
+
+
+C:\Users\flecoqui>kubectl get pod ingress-controller-nginx-ingress-controller-5bb68d7957-9t7tx -n ingress-nginx -o yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    prometheus.io/port: "10254"
+    prometheus.io/scrape: "true"
+  creationTimestamp: "2020-03-31T11:57:36Z"
+  generateName: ingress-controller-nginx-ingress-controller-5bb68d7957-
+  labels:
+    app: nginx-ingress
+    app.kubernetes.io/component: controller
+    pod-template-hash: 5bb68d7957
+    release: ingress-controller
+  name: ingress-controller-nginx-ingress-controller-5bb68d7957-9t7tx
+  namespace: ingress-nginx
+  ownerReferences:
+  - apiVersion: apps/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: ReplicaSet
+    name: ingress-controller-nginx-ingress-controller-5bb68d7957
+    uid: 80fb494c-d463-4b54-8d3a-e02686e89b81
+  resourceVersion: "95870"
+  selfLink: /api/v1/namespaces/ingress-nginx/pods/ingress-controller-nginx-ingress-controller-5bb68d7957-9t7tx
+  uid: ed395333-eddf-47e3-9acb-21647bc39c25
+spec:
+  containers:
+  - args:
+    - /nginx-ingress-controller
+    - --default-backend-service=ingress-nginx/ingress-controller-nginx-ingress-default-backend
+    - --election-id=ingress-controller-leader
+    - --ingress-class=nginx
+    - --configmap=ingress-nginx/ingress-controller-nginx-ingress-controller
+    env:
+    - name: POD_NAME
+      valueFrom:
+        fieldRef:
+          apiVersion: v1
+          fieldPath: metadata.name
+    - name: POD_NAMESPACE
+      valueFrom:
+        fieldRef:
+          apiVersion: v1
+          fieldPath: metadata.namespace
+    image: quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.30.0
+    imagePullPolicy: IfNotPresent
+    livenessProbe:
+      failureThreshold: 3
+      httpGet:
+        path: /healthz
+        port: 10254
+        scheme: HTTP
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      successThreshold: 1
+      timeoutSeconds: 1
+    name: nginx-ingress-controller
+    ports:
+    - containerPort: 80
+      name: http
+      protocol: TCP
+    - containerPort: 443
+      name: https
+      protocol: TCP
+    - containerPort: 10254
+      name: metrics
+      protocol: TCP
+    readinessProbe:
+      failureThreshold: 3
+      httpGet:
+        path: /healthz
+        port: 10254
+        scheme: HTTP
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      successThreshold: 1
+      timeoutSeconds: 1
+    resources: {}
+    securityContext:
+      allowPrivilegeEscalation: true
+      capabilities:
+        add:
+        - NET_BIND_SERVICE
+        drop:
+        - ALL
+      runAsUser: 101
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: ingress-controller-nginx-ingress-token-bvxc7
+      readOnly: true
+  dnsPolicy: ClusterFirst
+  enableServiceLinks: true
+  nodeName: aks-nodepool1-73500938-vmss000000
+  priority: 0
+  restartPolicy: Always
+  schedulerName: default-scheduler
+  securityContext: {}
+  serviceAccount: ingress-controller-nginx-ingress
+  serviceAccountName: ingress-controller-nginx-ingress
+  terminationGracePeriodSeconds: 60
+  tolerations:
+  - effect: NoExecute
+    key: node.kubernetes.io/not-ready
+    operator: Exists
+    tolerationSeconds: 300
+  - effect: NoExecute
+    key: node.kubernetes.io/unreachable
+    operator: Exists
+    tolerationSeconds: 300
+  volumes:
+  - name: ingress-controller-nginx-ingress-token-bvxc7
+    secret:
+      defaultMode: 420
+      secretName: ingress-controller-nginx-ingress-token-bvxc7
+status:
+  conditions:
+  - lastProbeTime: null
+    lastTransitionTime: "2020-03-31T11:57:37Z"
+    status: "True"
+    type: Initialized
+  - lastProbeTime: null
+    lastTransitionTime: "2020-04-01T06:52:08Z"
+    status: "True"
+    type: Ready
+  - lastProbeTime: null
+    lastTransitionTime: "2020-04-01T06:52:08Z"
+    status: "True"
+    type: ContainersReady
+  - lastProbeTime: null
+    lastTransitionTime: "2020-03-31T11:57:37Z"
+    status: "True"
+    type: PodScheduled
+  containerStatuses:
+  - containerID: docker://0be154275f5c4cbbc3743de5d30edc7ca85baf3dc798c9ecede134c2237d27bc
+    image: quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.30.0
+    imageID: docker-pullable://quay.io/kubernetes-ingress-controller/nginx-ingress-controller@sha256:b312c91d0de688a21075078982b5e3a48b13b46eda4df743317d3059fc3ca0d9
+    lastState:
+      terminated:
+        containerID: docker://81fdc9661d8174b52a46d2d394bac879422d2f23e9a8a50f94f551d63734ab04
+        exitCode: 143
+        finishedAt: "2020-04-01T06:51:50Z"
+        reason: Error
+        startedAt: "2020-04-01T06:51:12Z"
+    name: nginx-ingress-controller
+    ready: true
+    restartCount: 2
+    state:
+      running:
+        startedAt: "2020-04-01T06:51:57Z"
+  hostIP: 10.240.0.4
+  phase: Running
+  podIP: 10.244.2.13
+  qosClass: BestEffort
+  startTime: "2020-03-31T11:57:37Z"
+
+C:\Users\flecoqui>kubectl get pod ingress-controller-nginx-ingress-controller-5bb68d7957-c6n5v -n ingress-nginx -o yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    prometheus.io/port: "10254"
+    prometheus.io/scrape: "true"
+  creationTimestamp: "2020-03-31T11:57:37Z"
+  generateName: ingress-controller-nginx-ingress-controller-5bb68d7957-
+  labels:
+    app: nginx-ingress
+    app.kubernetes.io/component: controller
+    pod-template-hash: 5bb68d7957
+    release: ingress-controller
+  name: ingress-controller-nginx-ingress-controller-5bb68d7957-c6n5v
+  namespace: ingress-nginx
+  ownerReferences:
+  - apiVersion: apps/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: ReplicaSet
+    name: ingress-controller-nginx-ingress-controller-5bb68d7957
+    uid: 80fb494c-d463-4b54-8d3a-e02686e89b81
+  resourceVersion: "95794"
+  selfLink: /api/v1/namespaces/ingress-nginx/pods/ingress-controller-nginx-ingress-controller-5bb68d7957-c6n5v
+  uid: 66a1836b-d951-4083-8d61-86f3b11376c9
+spec:
+  containers:
+  - args:
+    - /nginx-ingress-controller
+    - --default-backend-service=ingress-nginx/ingress-controller-nginx-ingress-default-backend
+    - --election-id=ingress-controller-leader
+    - --ingress-class=nginx
+    - --configmap=ingress-nginx/ingress-controller-nginx-ingress-controller
+    env:
+    - name: POD_NAME
+      valueFrom:
+        fieldRef:
+          apiVersion: v1
+          fieldPath: metadata.name
+    - name: POD_NAMESPACE
+      valueFrom:
+        fieldRef:
+          apiVersion: v1
+          fieldPath: metadata.namespace
+    image: quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.30.0
+    imagePullPolicy: IfNotPresent
+    livenessProbe:
+      failureThreshold: 3
+      httpGet:
+        path: /healthz
+        port: 10254
+        scheme: HTTP
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      successThreshold: 1
+      timeoutSeconds: 1
+    name: nginx-ingress-controller
+    ports:
+    - containerPort: 80
+      name: http
+      protocol: TCP
+    - containerPort: 443
+      name: https
+      protocol: TCP
+    - containerPort: 10254
+      name: metrics
+      protocol: TCP
+    readinessProbe:
+      failureThreshold: 3
+      httpGet:
+        path: /healthz
+        port: 10254
+        scheme: HTTP
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      successThreshold: 1
+      timeoutSeconds: 1
+    resources: {}
+    securityContext:
+      allowPrivilegeEscalation: true
+      capabilities:
+        add:
+        - NET_BIND_SERVICE
+        drop:
+        - ALL
+      runAsUser: 101
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: ingress-controller-nginx-ingress-token-bvxc7
+      readOnly: true
+  dnsPolicy: ClusterFirst
+  enableServiceLinks: true
+  nodeName: aks-nodepool1-73500938-vmss000002
+  priority: 0
+  restartPolicy: Always
+  schedulerName: default-scheduler
+  securityContext: {}
+  serviceAccount: ingress-controller-nginx-ingress
+  serviceAccountName: ingress-controller-nginx-ingress
+  terminationGracePeriodSeconds: 60
+  tolerations:
+  - effect: NoExecute
+    key: node.kubernetes.io/not-ready
+    operator: Exists
+    tolerationSeconds: 300
+  - effect: NoExecute
+    key: node.kubernetes.io/unreachable
+    operator: Exists
+    tolerationSeconds: 300
+  volumes:
+  - name: ingress-controller-nginx-ingress-token-bvxc7
+    secret:
+      defaultMode: 420
+      secretName: ingress-controller-nginx-ingress-token-bvxc7
+status:
+  conditions:
+  - lastProbeTime: null
+    lastTransitionTime: "2020-03-31T11:57:39Z"
+    status: "True"
+    type: Initialized
+  - lastProbeTime: null
+    lastTransitionTime: "2020-04-01T06:51:45Z"
+    status: "True"
+    type: Ready
+  - lastProbeTime: null
+    lastTransitionTime: "2020-04-01T06:51:45Z"
+    status: "True"
+    type: ContainersReady
+  - lastProbeTime: null
+    lastTransitionTime: "2020-03-31T11:57:37Z"
+    status: "True"
+    type: PodScheduled
+  containerStatuses:
+  - containerID: docker://183380aa11847f92a377deb73a52a3d59923dce093822fbfe176502cd7a4e4eb
+    image: quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.30.0
+    imageID: docker-pullable://quay.io/kubernetes-ingress-controller/nginx-ingress-controller@sha256:b312c91d0de688a21075078982b5e3a48b13b46eda4df743317d3059fc3ca0d9
+    lastState:
+      terminated:
+        containerID: docker://61df60c4e89e021565f97fdaaa30cbc48ef430632c2027ef7267183e0fb4d548
+        exitCode: 143
+        finishedAt: "2020-04-01T06:51:25Z"
+        reason: Error
+        startedAt: "2020-04-01T06:50:54Z"
+    name: nginx-ingress-controller
+    ready: true
+    restartCount: 2
+    state:
+      running:
+        startedAt: "2020-04-01T06:51:29Z"
+  hostIP: 10.240.0.6
+  phase: Running
+  podIP: 10.244.1.9
+  qosClass: BestEffort
+  startTime: "2020-03-31T11:57:39Z"
+
+C:\Users\flecoqui>kubectl get pod ingress-controller-nginx-ingress-default-backend-7cdd9c96fxdqjw  -n ingress-nginx -o yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: "2020-03-31T11:57:36Z"
+  generateName: ingress-controller-nginx-ingress-default-backend-7cdd9c96fb-
+  labels:
+    app: nginx-ingress
+    app.kubernetes.io/component: default-backend
+    pod-template-hash: 7cdd9c96fb
+    release: ingress-controller
+  name: ingress-controller-nginx-ingress-default-backend-7cdd9c96fxdqjw
+  namespace: ingress-nginx
+  ownerReferences:
+  - apiVersion: apps/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: ReplicaSet
+    name: ingress-controller-nginx-ingress-default-backend-7cdd9c96fb
+    uid: 7d7b61b1-0f09-4998-af74-fcc12c8f800d
+  resourceVersion: "95652"
+  selfLink: /api/v1/namespaces/ingress-nginx/pods/ingress-controller-nginx-ingress-default-backend-7cdd9c96fxdqjw
+  uid: eb1f8d12-106e-4c9d-95d2-768c79c12b3c
+spec:
+  containers:
+  - image: k8s.gcr.io/defaultbackend-amd64:1.5
+    imagePullPolicy: IfNotPresent
+    livenessProbe:
+      failureThreshold: 3
+      httpGet:
+        path: /healthz
+        port: 8080
+        scheme: HTTP
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      successThreshold: 1
+      timeoutSeconds: 5
+    name: nginx-ingress-default-backend
+    ports:
+    - containerPort: 8080
+      name: http
+      protocol: TCP
+    readinessProbe:
+      failureThreshold: 6
+      httpGet:
+        path: /healthz
+        port: 8080
+        scheme: HTTP
+      periodSeconds: 5
+      successThreshold: 1
+      timeoutSeconds: 5
+    resources: {}
+    securityContext:
+      runAsUser: 65534
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: ingress-controller-nginx-ingress-backend-token-z4s55
+      readOnly: true
+  dnsPolicy: ClusterFirst
+  enableServiceLinks: true
+  nodeName: aks-nodepool1-73500938-vmss000002
+  priority: 0
+  restartPolicy: Always
+  schedulerName: default-scheduler
+  securityContext: {}
+  serviceAccount: ingress-controller-nginx-ingress-backend
+  serviceAccountName: ingress-controller-nginx-ingress-backend
+  terminationGracePeriodSeconds: 60
+  tolerations:
+  - effect: NoExecute
+    key: node.kubernetes.io/not-ready
+    operator: Exists
+    tolerationSeconds: 300
+  - effect: NoExecute
+    key: node.kubernetes.io/unreachable
+    operator: Exists
+    tolerationSeconds: 300
+  volumes:
+  - name: ingress-controller-nginx-ingress-backend-token-z4s55
+    secret:
+      defaultMode: 420
+      secretName: ingress-controller-nginx-ingress-backend-token-z4s55
+status:
+  conditions:
+  - lastProbeTime: null
+    lastTransitionTime: "2020-03-31T11:57:38Z"
+    status: "True"
+    type: Initialized
+  - lastProbeTime: null
+    lastTransitionTime: "2020-04-01T06:50:59Z"
+    status: "True"
+    type: Ready
+  - lastProbeTime: null
+    lastTransitionTime: "2020-04-01T06:50:59Z"
+    status: "True"
+    type: ContainersReady
+  - lastProbeTime: null
+    lastTransitionTime: "2020-03-31T11:57:37Z"
+    status: "True"
+    type: PodScheduled
+  containerStatuses:
+  - containerID: docker://ecf9892b1dd70eb17d7aae53bb8f4a9adb82682cf4d8aebc06f98caf28625082
+    image: k8s.gcr.io/defaultbackend-amd64:1.5
+    imageID: docker-pullable://k8s.gcr.io/defaultbackend-amd64@sha256:4dc5e07c8ca4e23bddb3153737d7b8c556e5fb2f29c4558b7cd6e6df99c512c7
+    lastState:
+      terminated:
+        containerID: docker://de2a98779a2f406b6d0d7e692008c94b7f70c7067bca5f4a19ae466a5c325b80
+        exitCode: 255
+        finishedAt: "2020-04-01T06:50:26Z"
+        reason: Error
+        startedAt: "2020-03-31T11:57:44Z"
+    name: nginx-ingress-default-backend
+    ready: true
+    restartCount: 1
+    state:
+      running:
+        startedAt: "2020-04-01T06:50:51Z"
+  hostIP: 10.240.0.6
+  phase: Running
+  podIP: 10.244.1.10
+  qosClass: BestEffort
+  startTime: "2020-03-31T11:57:38Z"
+
+
+C:\Users\flecoqui>kubectl get pod keda-operator-6bdf8cbb68-l5pdf -n ingress-nginx -o yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: "2020-03-31T11:59:56Z"
+  generateName: keda-operator-6bdf8cbb68-
+  labels:
+    app: keda-operator
+    pod-template-hash: 6bdf8cbb68
+  name: keda-operator-6bdf8cbb68-l5pdf
+  namespace: ingress-nginx
+  ownerReferences:
+  - apiVersion: apps/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: ReplicaSet
+    name: keda-operator-6bdf8cbb68
+    uid: 3ede9216-0e95-4e91-a336-1a0a445d6045
+  resourceVersion: "95805"
+  selfLink: /api/v1/namespaces/ingress-nginx/pods/keda-operator-6bdf8cbb68-l5pdf
+  uid: 9d3b6eb5-945f-460e-9c24-cedff7183837
+spec:
+  containers:
+  - args:
+    - --zap-level=info
+    command:
+    - keda
+    env:
+    - name: WATCH_NAMESPACE
+    - name: POD_NAME
+      valueFrom:
+        fieldRef:
+          apiVersion: v1
+          fieldPath: metadata.name
+    - name: OPERATOR_NAME
+      value: keda-operator
+    image: docker.io/kedacore/keda:1.3.0
+    imagePullPolicy: Always
+    name: keda-operator
+    resources: {}
+    securityContext: {}
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: keda-operator-token-95b66
+      readOnly: true
+  dnsPolicy: ClusterFirst
+  enableServiceLinks: true
+  nodeName: aks-nodepool1-73500938-vmss000002
+  priority: 0
+  restartPolicy: Always
+  schedulerName: default-scheduler
+  securityContext: {}
+  serviceAccount: keda-operator
+  serviceAccountName: keda-operator
+  terminationGracePeriodSeconds: 30
+  tolerations:
+  - effect: NoExecute
+    key: node.kubernetes.io/not-ready
+    operator: Exists
+    tolerationSeconds: 300
+  - effect: NoExecute
+    key: node.kubernetes.io/unreachable
+    operator: Exists
+    tolerationSeconds: 300
+  volumes:
+  - name: keda-operator-token-95b66
+    secret:
+      defaultMode: 420
+      secretName: keda-operator-token-95b66
+status:
+  conditions:
+  - lastProbeTime: null
+    lastTransitionTime: "2020-03-31T11:59:56Z"
+    status: "True"
+    type: Initialized
+  - lastProbeTime: null
+    lastTransitionTime: "2020-04-01T06:51:46Z"
+    status: "True"
+    type: Ready
+  - lastProbeTime: null
+    lastTransitionTime: "2020-04-01T06:51:46Z"
+    status: "True"
+    type: ContainersReady
+  - lastProbeTime: null
+    lastTransitionTime: "2020-03-31T11:59:56Z"
+    status: "True"
+    type: PodScheduled
+  containerStatuses:
+  - containerID: docker://4e93768e0c29c7773c0748de5084d15811d325ef7062e8f1391a87411ddb9804
+    image: kedacore/keda:1.3.0
+    imageID: docker-pullable://kedacore/keda@sha256:373fe79e83bd72c9dc069e304bd09638d7cf9a91c28ff7db4db3f19901f4ad26
+    lastState:
+      terminated:
+        containerID: docker://2c5db16e22b5ad34af07f9ee70f96eccd298047f310e351c5a8b396290a9ae28
+        exitCode: 1
+        finishedAt: "2020-04-01T06:51:31Z"
+        reason: Error
+        startedAt: "2020-04-01T06:50:54Z"
+    name: keda-operator
+    ready: true
+    restartCount: 2
+    state:
+      running:
+        startedAt: "2020-04-01T06:51:46Z"
+  hostIP: 10.240.0.6
+  phase: Running
+  podIP: 10.244.1.13
+  qosClass: BestEffort
+  startTime: "2020-03-31T11:59:56Z"
+
+C:\Users\flecoqui>kubectl get pod keda-operator-metrics-apiserver-78cd458bf-zx6qs  -n ingress-nginx -o yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: "2020-03-31T11:59:56Z"
+  generateName: keda-operator-metrics-apiserver-78cd458bf-
+  labels:
+    app: keda-operator-metrics-apiserver
+    pod-template-hash: 78cd458bf
+  name: keda-operator-metrics-apiserver-78cd458bf-zx6qs
+  namespace: ingress-nginx
+  ownerReferences:
+  - apiVersion: apps/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: ReplicaSet
+    name: keda-operator-metrics-apiserver-78cd458bf
+    uid: effb3e57-23e3-4d5d-b46c-9371c168a443
+  resourceVersion: "95863"
+  selfLink: /api/v1/namespaces/ingress-nginx/pods/keda-operator-metrics-apiserver-78cd458bf-zx6qs
+  uid: 3e1ae98d-abd6-4aae-a252-76b6c56d02d5
+spec:
+  containers:
+  - args:
+    - /usr/local/bin/keda-adapter
+    - --secure-port=6443
+    - --logtostderr=true
+    - --v=0
+    env:
+    - name: WATCH_NAMESPACE
+    image: docker.io/kedacore/keda-metrics-adapter:1.3.0
+    imagePullPolicy: Always
+    name: keda-operator-metrics-apiserver
+    ports:
+    - containerPort: 6443
+      name: https
+      protocol: TCP
+    - containerPort: 8080
+      name: http
+      protocol: TCP
+    resources: {}
+    securityContext: {}
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: keda-operator-token-95b66
+      readOnly: true
+  dnsPolicy: ClusterFirst
+  enableServiceLinks: true
+  nodeName: aks-nodepool1-73500938-vmss000000
+  priority: 0
+  restartPolicy: Always
+  schedulerName: default-scheduler
+  securityContext: {}
+  serviceAccount: keda-operator
+  serviceAccountName: keda-operator
+  terminationGracePeriodSeconds: 30
+  tolerations:
+  - effect: NoExecute
+    key: node.kubernetes.io/not-ready
+    operator: Exists
+    tolerationSeconds: 300
+  - effect: NoExecute
+    key: node.kubernetes.io/unreachable
+    operator: Exists
+    tolerationSeconds: 300
+  volumes:
+  - name: keda-operator-token-95b66
+    secret:
+      defaultMode: 420
+      secretName: keda-operator-token-95b66
+status:
+  conditions:
+  - lastProbeTime: null
+    lastTransitionTime: "2020-03-31T11:59:56Z"
+    status: "True"
+    type: Initialized
+  - lastProbeTime: null
+    lastTransitionTime: "2020-04-01T06:52:07Z"
+    status: "True"
+    type: Ready
+  - lastProbeTime: null
+    lastTransitionTime: "2020-04-01T06:52:07Z"
+    status: "True"
+    type: ContainersReady
+  - lastProbeTime: null
+    lastTransitionTime: "2020-03-31T11:59:56Z"
+    status: "True"
+    type: PodScheduled
+  containerStatuses:
+  - containerID: docker://150d4454f7451fc6a8a25b19a36a6d37f3fc2f23611446bccc0b36f9b31ae832
+    image: kedacore/keda-metrics-adapter:1.3.0
+    imageID: docker-pullable://kedacore/keda-metrics-adapter@sha256:6bc7115332dddf13f77025ee0788fdc99d5757f563fff3dc17b02afb6e2a330d
+    lastState:
+      terminated:
+        containerID: docker://4de35f98550d8552b7eed2cac1b14e68021ba97c12ce3cb25ee8df9375a58543
+        exitCode: 1
+        finishedAt: "2020-04-01T06:51:53Z"
+        reason: Error
+        startedAt: "2020-04-01T06:51:11Z"
+    name: keda-operator-metrics-apiserver
+    ready: true
+    restartCount: 2
+    state:
+      running:
+        startedAt: "2020-04-01T06:52:07Z"
+  hostIP: 10.240.0.4
+  phase: Running
+  podIP: 10.244.2.9
+  qosClass: BestEffort
+  startTime: "2020-03-31T11:59:56Z"
+
+C:\Users\flecoqui>kubectl get pod prometheus-server-7f56b89f78-dg5qc -n ingress-nginx -o yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: "2020-03-31T11:59:36Z"
+  generateName: prometheus-server-7f56b89f78-
+  labels:
+    app.kubernetes.io/name: prometheus
+    app.kubernetes.io/part-of: ingress-nginx
+    pod-template-hash: 7f56b89f78
+  name: prometheus-server-7f56b89f78-dg5qc
+  namespace: ingress-nginx
+  ownerReferences:
+  - apiVersion: apps/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: ReplicaSet
+    name: prometheus-server-7f56b89f78
+    uid: 9e73ea87-2cbd-4ade-ad9e-30ac3af8e933
+  resourceVersion: "95710"
+  selfLink: /api/v1/namespaces/ingress-nginx/pods/prometheus-server-7f56b89f78-dg5qc
+  uid: 69ade3c1-5fca-4f72-927f-a221856cfbcc
+spec:
+  containers:
+  - args:
+    - --config.file=/etc/prometheus/prometheus.yaml
+    - --storage.tsdb.path=/prometheus/
+    image: prom/prometheus:v2.3.2
+    imagePullPolicy: IfNotPresent
+    name: prometheus
+    ports:
+    - containerPort: 9090
+      protocol: TCP
+    resources: {}
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /etc/prometheus/
+      name: prometheus-config-volume
+    - mountPath: /prometheus/
+      name: prometheus-storage-volume
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: prometheus-server-token-z45q8
+      readOnly: true
+  dnsPolicy: ClusterFirst
+  enableServiceLinks: true
+  nodeName: aks-nodepool1-73500938-vmss000000
+  priority: 0
+  restartPolicy: Always
+  schedulerName: default-scheduler
+  securityContext: {}
+  serviceAccount: prometheus-server
+  serviceAccountName: prometheus-server
+  terminationGracePeriodSeconds: 30
+  tolerations:
+  - effect: NoExecute
+    key: node.kubernetes.io/not-ready
+    operator: Exists
+    tolerationSeconds: 300
+  - effect: NoExecute
+    key: node.kubernetes.io/unreachable
+    operator: Exists
+    tolerationSeconds: 300
+  volumes:
+  - configMap:
+      defaultMode: 420
+      name: prometheus-configuration-hct76d4c56
+    name: prometheus-config-volume
+  - emptyDir: {}
+    name: prometheus-storage-volume
+  - name: prometheus-server-token-z45q8
+    secret:
+      defaultMode: 420
+      secretName: prometheus-server-token-z45q8
+status:
+  conditions:
+  - lastProbeTime: null
+    lastTransitionTime: "2020-03-31T11:59:36Z"
+    status: "True"
+    type: Initialized
+  - lastProbeTime: null
+    lastTransitionTime: "2020-04-01T06:51:13Z"
+    status: "True"
+    type: Ready
+  - lastProbeTime: null
+    lastTransitionTime: "2020-04-01T06:51:13Z"
+    status: "True"
+    type: ContainersReady
+  - lastProbeTime: null
+    lastTransitionTime: "2020-03-31T11:59:36Z"
+    status: "True"
+    type: PodScheduled
+  containerStatuses:
+  - containerID: docker://c737d90822acde24e47712598b14cfd431d84dcc7442836a8256dccb897fc65d
+    image: prom/prometheus:v2.3.2
+    imageID: docker-pullable://prom/prometheus@sha256:7d99455a045a6c89c0dbee6e1fe659eb83bd3a19e171606bc0fd10eb0e34a7dc
+    lastState:
+      terminated:
+        containerID: docker://cb70fd4ded563b00773e8820aa443890ae8048dc59742daabf90e486cb725b21
+        exitCode: 255
+        finishedAt: "2020-04-01T06:50:38Z"
+        reason: Error
+        startedAt: "2020-03-31T11:59:45Z"
+    name: prometheus
+    ready: true
+    restartCount: 1
+    state:
+      running:
+        startedAt: "2020-04-01T06:51:08Z"
+  hostIP: 10.240.0.4
+  phase: Running
+  podIP: 10.244.2.12
+  qosClass: BestEffort
+  startTime: "2020-03-31T11:59:36Z"
+
+

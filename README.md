@@ -303,6 +303,181 @@ For instance:
 
     C:\git\Me\TestFunctionRestAPI> .\install-aks-acr-webapi-windows.ps1 TestFunctionRestAPIrg testrestapi  Standard_D2_v2 3 
 
+
+
+Below the final architecture with the different pods:
+
+![](https://raw.githubusercontent.com/flecoqui/TestFunctionRestAPI/master/Docs/1-architecture-webapi.png)
+
+
+### COLLECTING PROMETHEUS METRICS WITH AZURE MONITOR
+
+Now your AKS deployment is running using Prometheus and Keda to trigger the autoscale.
+As Prometheus has been deployed, you can collect all the Prometheus metrics using Azune Monitor.
+
+First you need to enable Azure Monitor on your AKS Cluster with the following Azure CLI command:
+
+        az aks enable-addons -a monitoring -n MyExistingManagedCluster -g MyExistingManagedClusterRG  
+
+For instance:
+
+        az aks enable-addons -a monitoring -n testrestapiaksCluster -g TestFunctionRestAPIrg  
+
+Check if the omsagent has been deployed on your AKS Cluster runnning the following command:
+
+
+        kubectl get pods -n kube-system
+
+You should see a pod with a name starting with omsagent-rs:
+
+        C:\git\me\TestFunctionRestAPI\TestFunctionAppv3.1>kubectl get pods -n kube-system
+        NAME                                    READY   STATUS    RESTARTS   AGE
+        coredns-698c77c5d7-p4qgj                1/1     Running   1          2d3h
+        coredns-698c77c5d7-tzzb6                1/1     Running   1          2d3h
+        coredns-autoscaler-79b778686c-cxfjm     1/1     Running   1          2d3h
+        kube-proxy-5kxzq                        1/1     Running   1          2d3h
+        kube-proxy-kh925                        1/1     Running   1          2d3h
+        kube-proxy-xj7w8                        1/1     Running   1          2d3h
+        kubernetes-dashboard-74d8c675bc-pwx27   1/1     Running   3          2d3h
+        metrics-server-69df9f75bf-mhb9w         1/1     Running   2          2d3h
+        omsagent-rs-68c66868fd-cjfkl            1/1     Running   2          2d3h
+        tunnelfront-d9656675f-pgwhf             1/1     Running   1          2d3h
+
+Now, you can define which metrics you want to collect in editing the file configmap.yaml here: https://github.com/flecoqui/TestFunctionRestAPI/blob/master/TestFunctionAppv3.1/configmap.yaml
+
+Content below:
+
+        kind: ConfigMap
+        apiVersion: v1
+        data:
+        schema-version:
+            #string.used by agent to parse config. supported versions are {v1}. Configs with other schema versions will be rejected by the agent.
+            v1
+        config-version:
+            #string.used by customer to keep track of this config file's version in their source control/repository (max allowed 10 chars, other chars will be truncated)
+            ver1
+        log-data-collection-settings: |-
+            # Log data collection settings
+            # Any errors related to config map settings can be found in the KubeMonAgentEvents table in the Log Analytics workspace that the cluster is sending data to.
+
+            [log_collection_settings]
+            [log_collection_settings.stdout]
+                # In the absense of this configmap, default value for enabled is true
+                enabled = true
+                # exclude_namespaces setting holds good only if enabled is set to true
+                # kube-system log collection is disabled by default in the absence of 'log_collection_settings.stdout' setting. If you want to enable kube-system, remove it from the following setting.
+                # If you want to continue to disable kube-system log collection keep this namespace in the following setting and add any other namespace you want to disable log collection to the array.
+                # In the absense of this configmap, default value for exclude_namespaces = ["kube-system"]
+                exclude_namespaces = ["kube-system"]
+
+            [log_collection_settings.stderr]
+                # Default value for enabled is true
+                enabled = true
+                # exclude_namespaces setting holds good only if enabled is set to true
+                # kube-system log collection is disabled by default in the absence of 'log_collection_settings.stderr' setting. If you want to enable kube-system, remove it from the following setting.
+                # If you want to continue to disable kube-system log collection keep this namespace in the following setting and add any other namespace you want to disable log collection to the array.
+                # In the absense of this cofigmap, default value for exclude_namespaces = ["kube-system"]
+                exclude_namespaces = ["kube-system"]
+
+            [log_collection_settings.env_var]
+                # In the absense of this configmap, default value for enabled is true
+                enabled = true
+            [log_collection_settings.enrich_container_logs]
+                # In the absense of this configmap, default value for enrich_container_logs is false
+                enabled = false
+                # When this is enabled (enabled = true), every container log entry (both stdout & stderr) will be enriched with container Name & container Image
+            [log_collection_settings.collect_all_kube_events]
+                # In the absense of this configmap, default value for collect_all_kube_events is false
+                # When the setting is set to false, only the kube events with !normal event type will be collected
+                enabled = false
+                # When this is enabled (enabled = true), all kube events including normal events will be collected
+        prometheus-data-collection-settings: |-
+            # Custom Prometheus metrics data collection settings
+            [prometheus_data_collection_settings.cluster]
+                # Cluster level scrape endpoint(s). These metrics will be scraped from agent's Replicaset (singleton)
+                # Any errors related to prometheus scraping can be found in the KubeMonAgentEvents table in the Log Analytics workspace that the cluster is sending data to.
+
+                #Interval specifying how often to scrape for metrics. This is duration of time and can be specified for supporting settings by combining an integer value and time unit as a string value. Valid time units are ns, us (or µs), ms, s, m, h.
+                interval = "1m"
+
+                ## Uncomment the following settings with valid string arrays for prometheus scraping
+                #fieldpass = ["metric_to_pass1", "metric_to_pass12"]
+
+                #fielddrop = ["metric_to_drop"]
+
+                # An array of urls to scrape metrics from.
+                urls = ["http://10.244.2.13:10254/metrics","http://10.244.1.9:10254/metrics","http://10.244.1.13:8383/metrics","http://10.244.2.12:9090/metrics"]
+
+                # An array of Kubernetes services to scrape metrics from.
+                # kubernetes_services = ["http://my-service-dns.my-namespace:9102/metrics"]
+
+                # When monitor_kubernetes_pods = true, replicaset will scrape Kubernetes pods for the following prometheus annotations:
+                # - prometheus.io/scrape: Enable scraping for this pod
+                # - prometheus.io/scheme: If the metrics endpoint is secured then you will need to
+                #     set this to `https` & most likely set the tls config.
+                # - prometheus.io/path: If the metrics path is not /metrics, define it with this annotation.
+                # - prometheus.io/port: If port is not 9102 use this annotation
+                monitor_kubernetes_pods = true
+
+                ## Restricts Kubernetes monitoring to namespaces for pods that have annotations set and are scraped using the monitor_kubernetes_pods setting.
+                ## This will take effect when monitor_kubernetes_pods is set to true
+                ##   ex: monitor_kubernetes_pods_namespaces = ["default1", "default2", "default3"]
+                # monitor_kubernetes_pods_namespaces = ["default1"]
+
+            [prometheus_data_collection_settings.node]
+                # Node level scrape endpoint(s). These metrics will be scraped from agent's DaemonSet running in every node in the cluster
+                # Any errors related to prometheus scraping can be found in the KubeMonAgentEvents table in the Log Analytics workspace that the cluster is sending data to.
+
+                #Interval specifying how often to scrape for metrics. This is duration of time and can be specified for supporting settings by combining an integer value and time unit as a string value. Valid time units are ns, us (or µs), ms, s, m, h.
+                interval = "1m"
+
+                ## Uncomment the following settings with valid string arrays for prometheus scraping
+
+                # An array of urls to scrape metrics from. $NODE_IP (all upper case) will substitute of running Node's IP address
+                # urls = ["http://$NODE_IP:9103/metrics"]
+
+                #fieldpass = ["metric_to_pass1", "metric_to_pass12"]
+
+                #fielddrop = ["metric_to_drop"]
+        metadata:
+        name: container-azm-ms-agentconfig
+        namespace: kube-system
+
+You can for instance define the list of pods to scrape in updating the field urls:
+             
+             
+             urls = ["http://10.244.2.13:10254/metrics","http://10.244.1.9:10254/metrics","http://10.244.1.13:8383/metrics","http://10.244.2.12:9090/metrics"]
+
+You can also activate the default prometheus scrape in updating the variable monitor_kubernetes_pods
+
+                monitor_kubernetes_pods = true
+
+When the file configmap.yaml is ready, apply this file with the following command:
+
+
+        C:\git\me\TestFunctionRestAPI\TestFunctionAppv3.1>Kubectl apply -f  configmap.yaml
+
+
+After few minutes, if you select Azure Logs for the AKS Cluster on the Azure portal:
+
+![](https://raw.githubusercontent.com/flecoqui/TestFunctionRestAPI/master/Docs/azurelogs-1.png)
+
+
+You can try to launch the following query :
+
+        InsightsMetrics | where Namespace == "prometheus" and Name == "rest_client_requests_total"
+
+And you should see a result like this one:
+
+![](https://raw.githubusercontent.com/flecoqui/TestFunctionRestAPI/master/Docs/azurelogs-2.png)
+
+
+below the architecture  with the omsagent:
+
+![](https://raw.githubusercontent.com/flecoqui/TestFunctionRestAPI/master/Docs/1-architecture-webapi-omsagent.png)
+
+
+
 ### DELETE THE RESOURCE GROUP:
 
 * **Azure CLI 1.0:**      azure group delete "ResourceGroupName" "RegionName"

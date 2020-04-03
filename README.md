@@ -310,7 +310,7 @@ Below the final architecture with the different pods:
 ![](https://raw.githubusercontent.com/flecoqui/TestFunctionRestAPI/master/Docs/1-architecture-webapi.png)
 
 
-### DEPLOY 2 REST API IN A .Net Core 3.1 WEBAPI ON AZURE KUBERNETES SERVICE USING AZURE CONTAINER REGISTRY AND SPECIFIC SCALABILTY RULE FOR EACH SERVICE:
+### DEPLOY TWO DIFFERENT .Net Core 3.1 WEBAPI SERVICES ON AZURE KUBERNETES SERVICE USING AZURE CONTAINER REGISTRY AND A SPECIFIC SCALABILTY RULE FOR EACH SERVICE:
 
 The objective of this chapter is to show how to:
 - deploy two different .Net Core 3.1 Web API services on the same AKS Cluster
@@ -398,7 +398,7 @@ Note the name of the prometheus server pod and forward the tcp port 9090 to yuor
 In another command shell run the following command to display the value of the counter which will trigger the autoscale mecanism:
 
         curl -g http://localhost:9090/api/v1/query?query=sum(rate(<functionName>_http_request[1m]))
-        
+
         {"status":"success","data":{"resultType":"vector","result":[{"metric":{},"value":[1585926783.956,"0"]}]}}
 
 

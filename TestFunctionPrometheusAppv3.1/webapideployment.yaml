@@ -26,10 +26,13 @@ spec:
       - name: function-<FunctionName>-http
         image: <ACRName>.azurecr.io/function-<ContainerName>
         imagePullPolicy: Always
-        environment:
-        - METRICS_PATH=/metrics
-        - EXPOSE_HTTP_METRICS=false
-        - METRICS_PREFIX=/metrics
+        env:
+        - name: METRICS_PATH
+          value: "/metrics"
+        - name: EXPOSE_HTTP_METRICS
+          value: "false"
+        - name: METRICS_PREFIX
+          value: "<FunctionName>"
         ports:
         - containerPort: 80
           protocol: TCP

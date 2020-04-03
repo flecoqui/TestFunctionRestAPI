@@ -310,6 +310,37 @@ Below the final architecture with the different pods:
 ![](https://raw.githubusercontent.com/flecoqui/TestFunctionRestAPI/master/Docs/1-architecture-webapi.png)
 
 
+### DEPLOY 2 REST API IN A .Net Core 3.1 WEBAPI ON AZURE KUBERNETES SERVICE USING AZURE CONTAINER REGISTRY AND SPECIFIC SCALABILTY RULE FOR EACH SERVICE:
+
+In order to deploy the REST API on Azure Container Instance or Azure Kubernetes, you will use a Powershell script on Windows and a Bash script on Linux with the following parameters:</p>
+* **ResourceGroupName:**						The name of the resource group used to deploy Azure Function, Azure App Service and Virtual Machine</p>
+* **namePrefix:**						The name prefix which has been used to deploy Azure Function, Azure App Service and Virtual Machine.</p>
+* **aksVMSize:**                        The size of the Virtual Machine running on the Kubernetes Cluster, for instance: Standard_D4s_v3, by default Standard_D2s_v3</p>
+* **aksNodeCount:**                         The number of node for the Kubernetes Cluster</p>
+</p>
+</p>
+
+Below the command lines for Windows and Linux, before launching the command line below check that the Docker Deamon is running on your machine:
+
+* **Powershell Windows:** C:\git\Me\TestFunctionRestAPI> .\install-aks-acr-webapi-prometheus-windows.ps1  "ResourceGroupName" "NamePrefix" "aksVMSize" "aksNodeCount" 
+
+* **Bash Linux:** ./install-aks-acr-webapi-prometheus.sh "ResourceGroupName" "NamePrefix" "aksVMSize" "aksNodeCount" 
+
+
+For instance:
+
+    ./install-aks-acr-webapi-prometheus.sh TestFunctionRestAPIrg testrestapi  Standard_D2_v2 3 
+
+    C:\git\Me\TestFunctionRestAPI> .\install-aks-acr-webapi-prometheus-windows.ps1 TestFunctionRestAPIrg testrestapi  Standard_D2_v2 3 
+
+
+
+Below the final architecture with the different pods:
+
+![](https://raw.githubusercontent.com/flecoqui/TestFunctionRestAPI/master/Docs/1-architecture-multi-webapi.png)
+
+
+
 ### COLLECTING PROMETHEUS METRICS WITH AZURE MONITOR
 
 Now your AKS deployment is running using Prometheus and Keda to trigger the autoscale.

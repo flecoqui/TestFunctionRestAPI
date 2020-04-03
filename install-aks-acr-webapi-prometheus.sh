@@ -122,8 +122,8 @@ then
     exit 1 
 else
 # To be completed
-functionAName = $prefixName + 'acrwebapiA' 
-functionBName = $prefixName + 'acrwebapiB' 
+functionAName = $prefixName + 'acrwebapia' 
+functionBName = $prefixName + 'acrwebapib' 
 containerName = $prefixName + 'acrwebapi' 
 acrName=$prefixName'acr'
 acrDNSName=$acrName'.azurecr.io'

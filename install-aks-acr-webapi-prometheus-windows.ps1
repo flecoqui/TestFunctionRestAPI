@@ -31,8 +31,8 @@ if($aksNodeCount -eq $null) {
 }
 # WARNING As the image name of the function must be different between DockerHub image and Azure Container Registry image
 # The function name are different for DockerHub  function name and Container Registry function name
-$functionAName = $prefixName + 'acrwebapiA' 
-$functionBName = $prefixName + 'acrwebapiB' 
+$functionAName = $prefixName + 'acrwebapia' 
+$functionBName = $prefixName + 'acrwebapib' 
 $containerName = $prefixName + 'acrwebapi' 
 $acrName = $prefixName + 'acr'
 $acrDNSName = $acrName + '.azurecr.io'

@@ -328,7 +328,7 @@ In order to deploy the 2 REST API on Azure Container Instance or Azure Kubernete
 The service called: "{namePrefix}acrwebapia" will expose a prometheus counter called "{namePrefix}acrwebapia_http_request".
 The service called: "{namePrefix}acrwebapib" will expose a prometheus counter called "{namePrefix}acrwebapib_http_request".
 
-Those counter will be used to trigger the autoscale mecanism. The autoscale rule is define the file keda-prometheus.yaml
+Those counter will be used to trigger the autoscale mechanism. The autoscale rule is define the file keda-prometheus.yaml
 
 
         apiVersion: keda.k8s.io/v1alpha1
@@ -395,7 +395,7 @@ Note the name of the prometheus server pod and forward the tcp port 9090 to yuor
 
         kubectl port-forward  prometheus-server-7f56b89f78-pjdhc -n ingress-nginx 9090:9090
 
-In another command shell run the following command to display the value of the counter which will trigger the autoscale mecanism:
+In another command shell run the following command to display the value of the counter which will trigger the autoscale mechanism:
 
         curl -g http://localhost:9090/api/v1/query?query=sum(rate(<functionName>_http_request[1m]))
 

@@ -312,13 +312,47 @@ Below the final architecture with the different pods:
 
 ### DEPLOY 2 REST API IN A .Net Core 3.1 WEBAPI ON AZURE KUBERNETES SERVICE USING AZURE CONTAINER REGISTRY AND SPECIFIC SCALABILTY RULE FOR EACH SERVICE:
 
-In order to deploy the REST API on Azure Container Instance or Azure Kubernetes, you will use a Powershell script on Windows and a Bash script on Linux with the following parameters:</p>
+The objective of this chapter is to show how to:
+- deploy two different .Net Core 3.1 Web API services on the same AKS Cluster
+- define scalabilty rule specific to each service using Prometheus
+
+In order to deploy the 2 REST API on Azure Container Instance or Azure Kubernetes, you will use a Powershell script on Windows and a Bash script on Linux with the following parameters:</p>
 * **ResourceGroupName:**						The name of the resource group used to deploy Azure Function, Azure App Service and Virtual Machine</p>
-* **namePrefix:**						The name prefix which has been used to deploy Azure Function, Azure App Service and Virtual Machine.</p>
+* **namePrefix:**						The name prefix which has been used to deploy the 2 Web API Service, the first service will be called: "{namePrefix}acrwebapia" and the second service "{namePrefix}acrwebapib" .</p>
 * **aksVMSize:**                        The size of the Virtual Machine running on the Kubernetes Cluster, for instance: Standard_D4s_v3, by default Standard_D2s_v3</p>
 * **aksNodeCount:**                         The number of node for the Kubernetes Cluster</p>
 </p>
 </p>
+
+
+The service called: "{namePrefix}acrwebapia" will expose a prometheus counter called "{namePrefix}acrwebapia_http_request".
+The service called: "{namePrefix}acrwebapib" will expose a prometheus counter called "{namePrefix}acrwebapib_http_request".
+
+Those counter will be used to trigger the autoscale mecanism. The autoscale rule is define the file keda-prometheus.yaml
+
+
+        apiVersion: keda.k8s.io/v1alpha1
+        kind: ScaledObject
+        metadata:
+            name: prometheus-scaledobject
+            namespace: ingress-nginx
+            labels:
+                deploymentName: function-<FunctionName>-http
+        spec:
+            scaleTargetRef:
+                deploymentName: function-<FunctionName>-http
+            pollingInterval: 15
+            cooldownPeriod:  30
+            minReplicaCount: 1
+            maxReplicaCount: 10
+            triggers:
+            - type: prometheus
+            metadata:
+                serverAddress: http://prometheus-server.ingress-nginx.svc.cluster.local:9090
+                metricName: access_frequency
+                threshold: '1'
+                query: sum(rate(<FunctionName>_http_request[1m]))
+
 
 Below the command lines for Windows and Linux, before launching the command line below check that the Docker Deamon is running on your machine:
 
@@ -339,6 +373,33 @@ Below the final architecture with the different pods:
 
 ![](https://raw.githubusercontent.com/flecoqui/TestFunctionRestAPI/master/Docs/1-architecture-multi-webapi.png)
 
+
+Once the solution is deployed, you can check whether the prometheus counter exposed by the 2 REST API are visible on the prometheus server running the following kubectl commands:
+
+List the pods running in the ingress-nginx namespace:
+
+
+        kubectl get pods  -n ingress-nginx
+
+        NAME                                                              READY   STATUS    RESTARTS   AGE
+        function-testrestapiacrwebapia-http-6cf4c7bbdc-p7n2m              1/1     Running   0          9m17s
+        function-testrestapiacrwebapib-http-6cf99dd85b-n77rq              1/1     Running   0          46m
+        ingress-controller-nginx-ingress-controller-5bb68d7957-8ftss      1/1     Running   0          48m
+        ingress-controller-nginx-ingress-controller-5bb68d7957-qtdd5      1/1     Running   0          48m
+        ingress-controller-nginx-ingress-default-backend-7cdd9c96fss6vv   1/1     Running   0          48m
+        keda-operator-6bdf8cbb68-n98hk                                    1/1     Running   0          46m
+        keda-operator-metrics-apiserver-78cd458bf-dh29z                   1/1     Running   0          46m
+        prometheus-server-7f56b89f78-pjdhc                                1/1     Running   0          46m
+
+Note the name of the prometheus server pod and forward the tcp port 9090 to yuor machine:
+
+        kubectl port-forward  prometheus-server-7f56b89f78-pjdhc -n ingress-nginx 9090:9090
+
+In another command shell run the following command to display the value of the counter which will trigger the autoscale mecanism:
+
+        curl -g http://localhost:9090/api/v1/query?query=sum(rate(<functionName>_http_request[1m]))
+        
+        {"status":"success","data":{"resultType":"vector","result":[{"metric":{},"value":[1585926783.956,"0"]}]}}
 
 
 ### COLLECTING PROMETHEUS METRICS WITH AZURE MONITOR

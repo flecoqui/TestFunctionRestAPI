@@ -557,7 +557,7 @@ After few minutes, if you select Azure Logs for the AKS Cluster on the Azure por
 
 You can try to launch the following query :
 
-        InsightsMetrics | where Namespace == "prometheus" and Name == "rest_client_requests_total"
+        InsightsMetrics | where Namespace == "prometheus" and Name == "<FunctionName>_http_request"
 
 And you should see a result like this one:
 

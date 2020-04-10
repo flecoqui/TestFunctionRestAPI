@@ -1,0 +1,22 @@
+{{- $fullName := include "webapiapp.fullname" . -}}
+apiVersion: keda.k8s.io/v1alpha1
+kind: ScaledObject
+metadata:
+  name: {{ $fullName }}
+  labels:
+    deploymentName: {{ $fullName }}
+    {{- include "webapiapp.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    deploymentName: {{ $fullName }}
+  pollingInterval: {{ .Values.scaleobject.pollingInterval }}
+  cooldownPeriod:  {{ .Values.scaleobject.cooldownPeriod }}
+  minReplicaCount: {{ .Values.scaleobject.minReplicaCount }}
+  maxReplicaCount: {{ .Values.scaleobject.maxReplicaCount }}   
+  triggers:
+  - type: prometheus
+    metadata:
+      serverAddress: {{ .Values.scaleobject.serverAddress }}  
+      metricName: access_frequency
+      threshold: "{{ .Values.scaleobject.threshold }}"
+      query: {{ tpl .Values.scaleobject.query . | quote  }}

@@ -1,0 +1,61 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ include "webapiapp.fullname" . }}
+  labels:
+    {{- include "webapiapp.labels" . | nindent 4 }}
+    app: {{ include "webapiapp.fullname" . }}
+spec:
+  progressDeadlineSeconds: 600
+  replicas: {{ .Values.deployment.replicaCount }}
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      {{- include "webapiapp.selectorLabels" . | nindent 6 }}
+      app: {{ include "webapiapp.fullname" . }}
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        {{- include "webapiapp.selectorLabels" . | nindent 8 }}
+        app: {{ include "webapiapp.fullname" . }}
+      {{- if .Values.deployment.deploymentAnnotations }}
+      annotations:
+      {{- range $key, $value := .Values.deployment.deploymentAnnotations}}
+        {{ $key }}: {{ $value | quote }}
+      {{- end }}
+      {{- end }}
+    spec:
+    {{- with .Values.deployment.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      securityContext:
+        {{- toYaml .Values.deployment.podSecurityContext | nindent 8 }}
+      containers:
+      - name: {{ .Chart.Name }}
+        securityContext:
+        {{- toYaml .Values.deployment.securityContext | nindent 12 }}
+        image: "{{ .Values.deployment.image.repository }}/{{ .Values.deployment.image.imageName }}:{{ .Values.deployment.image.tag }}"
+        imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
+        env:
+        - name: METRICS_PATH
+          value: "/metrics"
+        - name: EXPOSE_HTTP_METRICS
+          value: "false"
+        - name: METRICS_PREFIX
+          value: "{{ include "webapiapp.fullname" . }}"
+        ports:
+        - name: http
+          containerPort: 80
+          protocol: TCP
+        resources:
+        {{- toYaml .Values.deployment.resources | nindent 12 }}
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      terminationGracePeriodSeconds: 30

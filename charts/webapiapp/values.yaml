@@ -12,28 +12,16 @@ fullnameOverride: ""
 #
 deployment:
   replicaCount: 1
-  ## Annotations to be added to the deployment
-  ##
-  deploymentAnnotations: {}
 
-  imagePullSecrets: 
-  - name: babb4cfc-9e5e-44a4-8e56-4bc455dea0c2
-
-  podSecurityContext: {}
-    # fsGroup: 2000
-
-  securityContext: {}
-    # capabilities:
-    #   drop:
-    #   - ALL
-    # readOnlyRootFilesystem: true
-    # runAsNonRoot: true
-    # runAsUser: 1000
   image:
     repository: testrestapiacr.azurecr.io
     imageName: function-testrestapiacrwebapi
     tag: latest
     pullPolicy: Always
+
+  imagePullSecrets: 
+  - name: <insert registry secret here>
+
   resources: {}
     # We usually recommend not to specify default resources and to leave this as a conscious
     # choice for the user. This also increases chances charts run on environments with little
@@ -45,6 +33,20 @@ deployment:
     # requests:
     #   cpu: 100m
     #   memory: 128Mi
+  ## Annotations to be added to the deployment
+  ##
+  deploymentAnnotations: {}
+
+  podSecurityContext: {}
+    # fsGroup: 2000
+
+  securityContext: {}
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+    # runAsUser: 1000
 
 #
 #

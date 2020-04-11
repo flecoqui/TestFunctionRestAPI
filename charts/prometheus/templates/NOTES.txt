@@ -1,0 +1,7 @@
+1. Get the application URL by running these commands:
+Chart Name {{ .Chart.Name }}
+Release Name {{ .Release.Name }}
+prometheus FullName {{ include "prometheus.fullname" .}}
+prometheus Name {{ include "prometheus.name" . }}
+Prometheus server: 
+http://{{ .Values.deployment.serviceName }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.deployment.port }}

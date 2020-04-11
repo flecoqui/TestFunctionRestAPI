@@ -146,6 +146,11 @@ $pullpwd = $acrName + '-pull-pwd'
 az keyvault secret show --vault-name $akvName --name $pullusr --query value -o tsv > akvappid.txt
 az keyvault secret show --vault-name $akvName --name $pullpwd --query value -o tsv > akvpassword.txt
 
+WriteLog ("Azure Container Registry Getting password for : " +  $acrName)
+$acrPassword  = Get-Content  .\akvpassword.txt -Raw  
+$acrPassword = $acrPassword.replace("`n","").replace("`r","")
+
+
 WriteLog "Deploying a kubernetes cluster" 
 az aks create --resource-group $resourceGroupName --name $aksClusterName --dns-name-prefix $aksName --node-vm-size $aksVMSize   --node-count $aksNodeCount --service-principal $acrSPAppId   --client-secret $acrSPPassword --generate-ssh-keys
 az aks get-credentials --resource-group $resourceGroupName --name $aksClusterName --overwrite-existing 
@@ -205,11 +210,7 @@ helm install keda kedacore/keda --namespace ingress-nginx
 kubectl get pods -n ingress-nginx
 
 
-WriteLog ("Azure Container Registry login for : " +  $acrName)
-az acr login --name $acrName
-WriteLog ("Azure Container Registry Getting password for : " +  $acrName)
-$acrPassword  = Get-Content  .\akvpassword.txt -Raw  
-$acrPassword = $acrPassword.replace("`n","").replace("`r","")
+
 
 WriteLog "Deploying WebAPI Net Core 3.1 container hosting the function A" 
 helm install $functionAName ./charts/webapiapp -n ingress-nginx --set ingress.hosts[0]."host"="$PublicDNSName" --set deployment.image.repository=$acrDNSName --set deployment.image.imageName=$imageName  --set deployment.image.tag=$imageTag  --set deployment.imagePullSecrets[0]."name"="$acrPassword"   --set deployment.deploymentAnnotations."prometheus\.io/scrape"="true" --set deployment.deploymentAnnotations."prometheus\.io/port"="80" --set deployment.deploymentAnnotations."prometheus\.io/path"="/metrics"
@@ -219,7 +220,8 @@ helm install $functionBName ./charts/webapiapp -n ingress-nginx --set ingress.ho
 
 
 WriteLog "Deploying an Ingress resource pointing to prometheus server" 
-kubectl apply -f .\TestFunctionPrometheusAppv3.1\ingress-prometheus.yaml
+#kubectl apply -f .\TestFunctionPrometheusAppv3.1\ingress-prometheus.yaml
+helm install prometheus-server ./charts/prometheus -n ingress-nginx
 
 writelog ("curl -d ""{\""name\"":\""0123456789\""}"" -H ""Content-Type: application/json""  -X POST   http://" + $PublicDNSName + "/" + $functionAName + "/api/values")
 writelog ("curl -H ""Content-Type: application/json""  -X GET   http://" + $PublicDNSName + "/" + $functionAName + "/api/test")

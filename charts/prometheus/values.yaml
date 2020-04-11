@@ -1,0 +1,13 @@
+# Default values for webapiapp.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+#
+#
+# deployment values
+#
+#
+deployment:
+  replicaCount: 1
+  port: 9090
+  serviceName: prometheus-server

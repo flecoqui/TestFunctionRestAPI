@@ -1,10 +1,10 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: {{ include "webapiapp.fullname" . }}
+  name: {{ .Release.Name }}
   labels:
     {{- include "webapiapp.labels" . | nindent 4 }}
-    app: {{ include "webapiapp.fullname" . }}
+    app: {{ .Release.Name }}
 spec:
   progressDeadlineSeconds: 600
   replicas: {{ .Values.deployment.replicaCount }}
@@ -12,7 +12,7 @@ spec:
   selector:
     matchLabels:
       {{- include "webapiapp.selectorLabels" . | nindent 6 }}
-      app: {{ include "webapiapp.fullname" . }}
+      app: {{ .Release.Name }}
   strategy:
     rollingUpdate:
       maxSurge: 25%
@@ -22,7 +22,7 @@ spec:
     metadata:
       labels:
         {{- include "webapiapp.selectorLabels" . | nindent 8 }}
-        app: {{ include "webapiapp.fullname" . }}
+        app: {{ .Release.Name }}
       {{- if .Values.deployment.deploymentAnnotations }}
       annotations:
       {{- range $key, $value := .Values.deployment.deploymentAnnotations}}
@@ -37,7 +37,7 @@ spec:
       securityContext:
         {{- toYaml .Values.deployment.podSecurityContext | nindent 8 }}
       containers:
-      - name: {{ .Chart.Name }}
+      - name: "{{ .Release.Name }}"
         securityContext:
         {{- toYaml .Values.deployment.securityContext | nindent 12 }}
         image: "{{ .Values.deployment.image.repository }}/{{ .Values.deployment.image.imageName }}:{{ .Values.deployment.image.tag }}"
@@ -48,7 +48,7 @@ spec:
         - name: EXPOSE_HTTP_METRICS
           value: "false"
         - name: METRICS_PREFIX
-          value: "{{ include "webapiapp.fullname" . }}"
+          value: "{{ .Release.Name }}"
         ports:
         - name: http
           containerPort: 80

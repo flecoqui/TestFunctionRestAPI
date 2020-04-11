@@ -111,7 +111,7 @@ $acrID = Get-Content .\acrid.txt -Raw
 WriteLog "Removing previous Service Principal " 
 az ad sp delete --id http://$acrSPName 
 WriteLog "Creating Service Principal with role acrpull" 
-az ad sp create-for-rbac --name http://$acrSPName --scopes $acrID --role acrpull --query password --output tsv > sppassword.txt
+az ad sp create-for-rbac --name http://$acrSPName --scopes $acrID --role acrpull --query password --output tsv > .\sppassword.txt
 $acrSPPassword  = Get-Password .\sppassword.txt 
 if($acrSPPassword -eq $null) {
      WriteLog "ACR SP Password not found "
@@ -150,9 +150,9 @@ WriteLog "Deploying a kubernetes cluster"
 az aks create --resource-group $resourceGroupName --name $aksClusterName --dns-name-prefix $aksName --node-vm-size $aksVMSize   --node-count $aksNodeCount --service-principal $acrSPAppId   --client-secret $acrSPPassword --generate-ssh-keys
 az aks get-credentials --resource-group $resourceGroupName --name $aksClusterName --overwrite-existing 
 
-WriteLog "Deploying a Tiller" 
-kubectl --namespace kube-system create serviceaccount tiller
-kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
+#WriteLog "Deploying a Tiller" 
+#kubectl --namespace kube-system create serviceaccount tiller
+#kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
 
 WriteLog "Preparing Helm repository" 
 helm repo add stable https://kubernetes-charts.storage.googleapis.com/
@@ -204,8 +204,7 @@ WriteLog "Deploying Keda with Helm"
 helm install keda kedacore/keda --namespace ingress-nginx
 kubectl get pods -n ingress-nginx
 
-WriteLog "Creating Function App image and deploying it" 
-# func init --docker-only
+
 WriteLog ("Azure Container Registry login for : " +  $acrName)
 az acr login --name $acrName
 WriteLog ("Azure Container Registry Getting password for : " +  $acrName)
@@ -213,10 +212,11 @@ $acrPassword  = Get-Content  .\akvpassword.txt -Raw
 $acrPassword = $acrPassword.replace("`n","").replace("`r","")
 
 WriteLog "Deploying WebAPI Net Core 3.1 container hosting the function A" 
-helm install $functionAName .\charts\webapiapp -n ingress-nginx --set ingress.hosts.host=$PublicDNSName --set deployment.image.repository=$acrDNSName --set deployment.image.imageName=$imageName  --set deployment.image.tag=$imageTag  --set deployment.imagePullSecrets.name=$acrPassword   --set deployment.deploymentAnnotations."prometheus\.io/scrape"="true" --set deployment.deploymentAnnotations."prometheus\.io/port"="80" --set deployment.deploymentAnnotations."prometheus\.io/path"="/metrics"
+helm install $functionAName ./charts/webapiapp -n ingress-nginx --set ingress.hosts[0]."host"="$PublicDNSName" --set deployment.image.repository=$acrDNSName --set deployment.image.imageName=$imageName  --set deployment.image.tag=$imageTag  --set deployment.imagePullSecrets[0]."name"="$acrPassword"   --set deployment.deploymentAnnotations."prometheus\.io/scrape"="true" --set deployment.deploymentAnnotations."prometheus\.io/port"="80" --set deployment.deploymentAnnotations."prometheus\.io/path"="/metrics"
 
 WriteLog "Deploying WebAPI Net Core 3.1 container hosting the function B" 
-helm install $functionBName .\charts\webapiapp -n ingress-nginx --set ingress.hosts.host=$PublicDNSName --set deployment.image.repository=$acrDNSName --set deployment.image.imageName=$imageName  --set deployment.image.tag=$imageTag  --set deployment.imagePullSecrets.name=$acrPassword   --set deployment.deploymentAnnotations."prometheus\.io/scrape"="true" --set deployment.deploymentAnnotations."prometheus\.io/port"="80" --set deployment.deploymentAnnotations."prometheus\.io/path"="/metrics"
+helm install $functionBName ./charts/webapiapp -n ingress-nginx --set ingress.hosts[0]."host"="$PublicDNSName" --set deployment.image.repository=$acrDNSName --set deployment.image.imageName=$imageName  --set deployment.image.tag=$imageTag  --set deployment.imagePullSecrets[0]."name"="$acrPassword"   --set deployment.deploymentAnnotations."prometheus\.io/scrape"="true" --set deployment.deploymentAnnotations."prometheus\.io/port"="80" --set deployment.deploymentAnnotations."prometheus\.io/path"="/metrics"
+
 
 WriteLog "Deploying an Ingress resource pointing to prometheus server" 
 kubectl apply -f .\TestFunctionPrometheusAppv3.1\ingress-prometheus.yaml

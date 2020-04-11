@@ -206,9 +206,9 @@ WriteLog "Deploying a kubernetes cluster"
 az aks create --resource-group $resourceGroupName --name $aksClusterName --dns-name-prefix $aksName --node-vm-size $aksVMSize   --node-count $aksNodeCount --service-principal $acrSPAppId   --client-secret $acrSPPassword --generate-ssh-keys
 az aks get-credentials --resource-group $resourceGroupName --name $aksClusterName --overwrite-existing 
 
-WriteLog "Deploying a Tiller" 
-kubectl --namespace kube-system create serviceaccount tiller
-kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
+#WriteLog "Deploying a Tiller" 
+#kubectl --namespace kube-system create serviceaccount tiller
+#kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
 
 WriteLog "Preparing Helm repository" 
 helm repo add stable https://kubernetes-charts.storage.googleapis.com/
@@ -275,10 +275,10 @@ WriteLog "Azure Container Registry Getting password for : "$acrName
 acrPassword=$(Get-FirstLine ./akvpassword.txt) 
 
 WriteLog "Deploying WebAPI Net Core 3.1 container hosting the function A" 
-helm install $functionAName ./charts/webapiapp -n ingress-nginx --set ingress.hosts.host=$PublicDNSName --set deployment.image.repository=$acrDNSName --set deployment.image.imageName=$imageName  --set deployment.image.tag=$imageTag  --set deployment.imagePullSecrets.name=$acrPassword   --set deployment.deploymentAnnotations."prometheus\.io/scrape"="true" --set deployment.deploymentAnnotations."prometheus\.io/port"="80" --set deployment.deploymentAnnotations."prometheus\.io/path"="/metrics"
+helm install $functionAName ./charts/webapiapp -n ingress-nginx --set ingress.hosts[0]."host"="$PublicDNSName" --set deployment.image.repository=$acrDNSName --set deployment.image.imageName=$imageName  --set deployment.image.tag=$imageTag  --set deployment.imagePullSecrets[0]."name"="$acrPassword"   --set deployment.deploymentAnnotations."prometheus\.io/scrape"="true" --set deployment.deploymentAnnotations."prometheus\.io/port"="80" --set deployment.deploymentAnnotations."prometheus\.io/path"="/metrics"
 
 WriteLog "Deploying WebAPI Net Core 3.1 container hosting the function B" 
-helm install $functionBName ./charts/webapiapp -n ingress-nginx --set ingress.hosts.host=$PublicDNSName --set deployment.image.repository=$acrDNSName --set deployment.image.imageName=$imageName  --set deployment.image.tag=$imageTag  --set deployment.imagePullSecrets.name=$acrPassword   --set deployment.deploymentAnnotations."prometheus\.io/scrape"="true" --set deployment.deploymentAnnotations."prometheus\.io/port"="80" --set deployment.deploymentAnnotations."prometheus\.io/path"="/metrics"
+helm install $functionBName ./charts/webapiapp -n ingress-nginx --set ingress.hosts[0]."host"="$PublicDNSName" --set deployment.image.repository=$acrDNSName --set deployment.image.imageName=$imageName  --set deployment.image.tag=$imageTag  --set deployment.imagePullSecrets[0]."name"="$acrPassword"   --set deployment.deploymentAnnotations."prometheus\.io/scrape"="true" --set deployment.deploymentAnnotations."prometheus\.io/port"="80" --set deployment.deploymentAnnotations."prometheus\.io/path"="/metrics"
 
 
 WriteLog "Deploying an Ingress resource pointing to prometheus server" 

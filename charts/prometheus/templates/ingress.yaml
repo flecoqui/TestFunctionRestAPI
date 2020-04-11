@@ -1,0 +1,16 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ .Values.deployment.serviceName }}
+  labels:
+    {{- include "prometheus.labels" . | nindent 4 }}
+  annotations:
+    kubernetes.io/ingress.class: nginx    
+spec:
+  rules:  
+    - http:
+        paths:
+        - backend:
+            serviceName: {{ .Values.deployment.serviceName }}
+            servicePort: {{ .Values.deployment.port }}
+          path: /

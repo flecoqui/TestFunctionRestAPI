@@ -105,10 +105,12 @@ az acr task create --image $imageNameId --image $latestImageName --name $imageTa
 WriteLog "Launching the task "
 az acr task run  -n $imageTask -r $acrName
 
-
-WriteLog "Creating Service Principal with role acrpull" 
+WriteLog "Getting ACR ID" 
 az acr show --name $acrName --query id --output tsv > acrid.txt
 $acrID = Get-Content .\acrid.txt -Raw 
+WriteLog "Removing previous Service Principal " 
+az ad sp delete --id http://$acrSPName 
+WriteLog "Creating Service Principal with role acrpull" 
 az ad sp create-for-rbac --name http://$acrSPName --scopes $acrID --role acrpull --query password --output tsv > sppassword.txt
 $acrSPPassword  = Get-Password .\sppassword.txt 
 if($acrSPPassword -eq $null) {

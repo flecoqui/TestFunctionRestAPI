@@ -85,5 +85,5 @@ scaleobject:
   minReplicaCount: 1
   maxReplicaCount: 10   
   threshold: "1"
-  query: sum(rate({{ include "webapiapp.fullname" . }}_http_request[1m]))
+  query: sum(rate({{ .Release.Name }}_http_request[1m]))
   serverAddress: http://prometheus-server.ingress-nginx.svc.cluster.local:9090

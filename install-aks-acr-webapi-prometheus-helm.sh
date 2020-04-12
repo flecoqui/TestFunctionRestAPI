@@ -213,15 +213,17 @@ az aks get-credentials --resource-group $resourceGroupName --name $aksClusterNam
 #kubectl --namespace kube-system create serviceaccount tiller
 #kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
 
-WriteLog "Preparing Helm repository" 
-helm repo add stable https://kubernetes-charts.storage.googleapis.com/
-helm repo add kedacore https://kedacore.github.io/charts
+#WriteLog "Preparing Helm repository" 
+#helm repo add stable https://kubernetes-charts.storage.googleapis.com/
+#helm repo add kedacore https://kedacore.github.io/charts
 
 WriteLog "Creating the name space" 
 kubectl create namespace ingress-nginx
 
 WriteLog "Deploying nginx Ingress controller with Helm" 
-helm install ingress-controller stable/nginx-ingress --namespace ingress-nginx --set controller.replicaCount=2 --set controller.metrics.enabled=true --set controller.podAnnotations."prometheus\.io/scrape"="true" --set controller.podAnnotations."prometheus\.io/port"="10254"
+#helm install ingress-controller stable/nginx-ingress --namespace ingress-nginx --set controller.replicaCount=2 --set controller.metrics.enabled=true --set controller.podAnnotations."prometheus\.io/scrape"="true" --set controller.podAnnotations."prometheus\.io/port"="10254"
+helm install ingress-controller ./charts/nginx-ingress -n ingress-nginx --set controller.replicaCount=2 --set controller.metrics.enabled=true --set controller.podAnnotations."prometheus\.io/scrape"="true" --set controller.podAnnotations."prometheus\.io/port"="10254"
+
 
 WriteLog "Waiting for Public IP address during 10 minutes max" 
 count=0
@@ -268,7 +270,8 @@ kubectl -n ingress-nginx get svc
 kubectl -n ingress-nginx get pods
 
 WriteLog "Deploying Keda with Helm" 
-helm install keda kedacore/keda --namespace ingress-nginx
+#helm install keda kedacore/keda --namespace ingress-nginx
+helm install keda ./charts/keda -n ingress-nginx 
 kubectl get pods -n ingress-nginx
 
 

@@ -32,6 +32,6 @@ spec:
       volumes:
         - name: prometheus-config-volume
           configMap:
-            name: prometheus-configuration
+            name: {{ .Values.deployment.serviceName }}
         - name: prometheus-storage-volume
           emptyDir: {}

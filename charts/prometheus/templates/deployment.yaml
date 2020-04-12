@@ -2,6 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Values.deployment.serviceName }}
+  labels:
+    {{- include "prometheus.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.deployment.replicaCount }}
   selector:
@@ -15,7 +17,8 @@ spec:
       serviceAccountName: {{ .Values.deployment.serviceName }}
       containers:
         - name: prometheus
-          image: prom/prometheus
+          image: "{{ .Values.deployment.repository }}:{{ .Values.deployment.tag }}"
+          imagePullPolicy: "{{ .Values.deployment.pullPolicy }}"
           args:
             - "--config.file=/etc/prometheus/prometheus.yaml"
             - "--storage.tsdb.path=/prometheus/"

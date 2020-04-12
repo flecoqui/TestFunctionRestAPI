@@ -201,7 +201,7 @@ $PublicDNSName=$(az network public-ip list --query "[?ipAddress!=null]|[?contain
 WriteLog ("Public DNS Name: " +$PublicDNSName) 
 
 WriteLog "Deploying Prometheus to monitor nginx Ingress controller" 
-#kubectl apply --kustomize github.com/kubernetes/ingress-nginx/deploy/prometheus/ 
+# kubectl apply --kustomize github.com/kubernetes/ingress-nginx/deploy/prometheus/ 
 helm install prometheus-server ./charts/prometheus -n ingress-nginx
 
 kubectl -n ingress-nginx get svc
@@ -222,7 +222,7 @@ helm install $functionBName ./charts/webapiapp -n ingress-nginx --set ingress.ho
 
 
 #WriteLog "Deploying an Ingress resource pointing to prometheus server" 
-#kubectl apply -f .\TestFunctionPrometheusAppv3.1\ingress-prometheus.yaml
+# kubectl apply -f .\TestFunctionPrometheusAppv3.1\ingress-prometheus.yaml
 
 writelog ("curl -d ""{\""name\"":\""0123456789\""}"" -H ""Content-Type: application/json""  -X POST   http://" + $PublicDNSName + "/" + $functionAName + "/api/values")
 writelog ("curl -H ""Content-Type: application/json""  -X GET   http://" + $PublicDNSName + "/" + $functionAName + "/api/test")

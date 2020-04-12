@@ -49,7 +49,7 @@ Selector labels
 */}}
 {{- define "prometheus.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "prometheus.name" . }}
-app.kubernetes.io/instance: {{ .Release.Name }}
+app.kubernetes.io/part-of: {{ .Release.Namespace }}
 {{- end -}}
 
 

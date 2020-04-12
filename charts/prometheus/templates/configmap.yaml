@@ -1,0 +1,20 @@
+apiVersion: v1
+data:
+  prometheus.yaml: "global:\r\n  scrape_interval: 10s\r\nscrape_configs:\r\n- job_name:
+    'ingress-nginx-endpoints'\r\n  kubernetes_sd_configs:\r\n  - role: pod\r\n    namespaces:\r\n
+    \     names:\r\n      - ingress-nginx\r\n  relabel_configs:\r\n  - source_labels:
+    [__meta_kubernetes_pod_annotation_prometheus_io_scrape]\r\n    action: keep\r\n
+    \   regex: true\r\n  - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scheme]\r\n
+    \   action: replace\r\n    target_label: __scheme__\r\n    regex: (https?)\r\n
+    \ - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]\r\n    action:
+    replace\r\n    target_label: __metrics_path__\r\n    regex: (.+)\r\n  - source_labels:
+    [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]\r\n    action:
+    replace\r\n    target_label: __address__\r\n    regex: ([^:]+)(?::\\d+)?;(\\d+)\r\n
+    \   replacement: $1:$2\r\n  - source_labels: [__meta_kubernetes_service_name]\r\n
+    \   regex: prometheus-server\r\n    action: drop\r\n"
+kind: ConfigMap
+metadata:
+  name: {{ .Values.deployment.serviceName }}
+  labels:
+    {{- include "prometheus.labels" . | nindent 4 }}
+

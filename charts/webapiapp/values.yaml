@@ -1,7 +1,26 @@
-# Default values for webapiapp.
+# Default values for WebAPI service deployed in AKS Cluster using Keda and Prometheus to trigger autoscale
+#      and container image stored in Azure Container Registry
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
+#
+# For instance: 
+# helm install $serviceAName ./charts/webapiapp -n ingress-nginx --set ingress.hosts[0]."host"="$PublicDNSName" --set deployment.image.repository=$acrDNSName --set deployment.image.imageName=$imageName  --set deployment.image.tag=$imageTag  --set deployment.imagePullSecrets[0]."name"="$acrPassword"   --set deployment.deploymentAnnotations."prometheus\.io/scrape"="true" --set deployment.deploymentAnnotations."prometheus\.io/port"="80" --set deployment.deploymentAnnotations."prometheus\.io/path"="/metrics"
+#
+# where:
+# $serviceName is the name of the new WebAPI service
+# $PublicDNSName is the dns name of the AKS Cluster
+# $acrDNSName is the dns name of the Azure Container Registry
+# $imageName is the container image name in Azure Container Registry
+# $imageTag is the tag associated with the container image name in Azure Container Registry
+# $acrPassword is the secret stored in Azure Key Vault associated with  Azure Container Registry
+# Moreover, you need to define whether the Prometheus metrics are exposed and the url associated with the Prometheus metrics, for instance: http://<>:80/metrics
+#
 
+ 
+
+#
+# Global values nameOverride and fullnameOverride which could be empty string
+#
 nameOverride: ""
 fullnameOverride: ""
 
@@ -11,16 +30,19 @@ fullnameOverride: ""
 #
 #
 deployment:
+  # Number of replica to install when the container is deployed
   replicaCount: 1
 
   image:
+    # Default image repository (Azure Container Registry DNS name), imageName and tag   
     repository: <insert registry dns name>
     imageName: <insert image name>
     tag: <insert image version>
     pullPolicy: Always
 
   imagePullSecrets: 
-   - name: <insert registry secret here>
+    # The secret stored in Azure Key Vault associated with  Azure Container Registry
+    - name: <insert registry secret here>
 
   resources: {}
     # We usually recommend not to specify default resources and to leave this as a conscious
@@ -68,7 +90,7 @@ ingress:
     kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/rewrite-target: /$2 
   hosts: 
-    - host: <insert dns name here>
+    - host: 
   tls: []
   #  - secretName: chart-example-tls
   #    hosts:
@@ -80,10 +102,17 @@ ingress:
 #
 #
 scaleobject:
+  # polling interval in seconds when query are evaluated and the autoscale triggered
   pollingInterval: 15
+  # cool down period in in seconds 
   cooldownPeriod:  30
+  # minimum replica for the service 
   minReplicaCount: 1
+  # maximum replica for the service 
   maxReplicaCount: 10   
+  # threshold to trigger the autoscale  
   threshold: "1"
+  # query used to trigger the autoscale when the value is over the trigger
   query: sum(rate({{ .Release.Name }}_http_request[1m]))
+  # Prometheus server url in the cluster
   serverAddress: http://prometheus-server.ingress-nginx.svc.cluster.local:9090

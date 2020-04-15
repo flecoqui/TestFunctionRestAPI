@@ -149,7 +149,7 @@ helm uninstall $functionAName -n $nameSpace
 WriteLog "Uninstalling WebAPI Net Core 3.1 container hosting the function B" 
 helm uninstall $functionBName -n $nameSpace 
 
-WriteLog ("Deleting namespace: " + $nameSpace)
+WriteLog "Deleting namespace: "$nameSpace
 kubectl delete namespaces $nameSpace
 
 

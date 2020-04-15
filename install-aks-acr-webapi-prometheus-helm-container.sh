@@ -3,14 +3,14 @@
 #- Purpose: Script is used to deploy nginx, keda, prometheus and webapi containers 
 #- Parameters are:
 # Parameter 1: resourceGroupName - resource group where the component will be depoyed
-# Parameter 2 aksClusterName - AKS Cluster name
-# Parameter 3 acrDNSName - Azure Container Registry DNS name
-# Parameter 4 imageName - WebAPI Container Image name
-# Parameter 5 imageTag - WebAPI Container Image Tag
-# Parameter 6 acrPassword - Azure Container Registry secret to pull the image
-# Parameter 7 functionAName - WebAPI service A name
-# Parameter 8 functionBName - WebAPI service A name
-# Parameter 9 nameSpace - kubernetes namespace
+# Parameter 2: aksClusterName - AKS Cluster name
+# Parameter 3: acrDNSName - Azure Container Registry DNS name
+# Parameter 4: imageName - WebAPI Container Image name
+# Parameter 5: imageTag - WebAPI Container Image Tag
+# Parameter 6: acrPassword - Azure Container Registry secret to pull the image
+# Parameter 7: functionAName - WebAPI service A name
+# Parameter 8: functionBName - WebAPI service A name
+# Parameter 9: nameSpace - kubernetes namespace
 ###########################################################################################################################################################################################
 
 
@@ -48,12 +48,17 @@ function usage() {
     echo
     echo "Arguments:"
     echo -e "\tParameter 1: resourceGroupName - resource group where the component will be depoyed"
-    echo -e "\tParameter 2: prefixName - prefix name which will be used to name the azure resources"
-    echo -e "\tParameter 3: aksVMSize - size of the Virtual Machine in the AKS cluster"
-    echo -e "\tParameter 4: aksNodeCount - number of virtual Machnine in the AKS cluster"
+    echo -e "\tParameter 2: aksClusterName - AKS Cluster name"
+    echo -e "\tParameter 3: acrDNSName - Azure Container Registry DNS name"
+    echo -e "\tParameter 4: imageName - WebAPI Container Image name"
+    echo -e "\tParameter 5: imageTag - WebAPI Container Image Tag"
+    echo -e "\tParameter 6: acrPassword - Azure Container Registry secret to pull the image"
+    echo -e "\tParameter 7: functionAName - WebAPI service A name"
+    echo -e "\tParameter 8: functionBName - WebAPI service A name"
+    echo -e "\tParameter 9: nameSpace - kubernetes namespace"
     echo
     echo "Example:"
-    echo -e "./"$source_file" TestFunctionRestAPIrg testrestapi  Standard_D2_v2 3 "
+    echo -e "./"$source_file" TestFunctionRestAPIrg testrestapiakscluster testrestapiacr.azurecr.io function-testrestapiacrwebapi latest 533ccd6b-0d4e-4c6a-b045-ee7653a2b6eb testrestapiacrwebapia testrestapiacrwebapib ingress-nginx"
 }
 
 #######################################################

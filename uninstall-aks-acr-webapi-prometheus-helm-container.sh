@@ -26,7 +26,7 @@ cd "$parent_path"
 resourceGroupName=$1
 aksClusterName=$2 
 functionAName=$3
-functionAName=$4
+functionBName=$4
 nameSpace=$5
 
 #######################################################

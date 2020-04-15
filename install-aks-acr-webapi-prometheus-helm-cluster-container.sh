@@ -8,7 +8,7 @@
 # Parameter 4: aksNodeCount - number of virtual Machnine in the AKS cluster
 ###########################################################################################################################################################################################
 
-set -eu
+set -e
 parent_path=$(
     cd "$(dirname "${BASH_SOURCE[0]}")"
     pwd -P

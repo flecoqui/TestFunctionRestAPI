@@ -38,7 +38,7 @@ imageName=$4
 imageTag=$5
 acrPassword=$6
 functionAName=$7
-functionAName=$8
+functionBName=$8
 nameSpace=$9
 
 #######################################################

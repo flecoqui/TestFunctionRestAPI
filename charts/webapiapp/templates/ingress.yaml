@@ -1,6 +1,7 @@
 {{- if .Values.ingress.enabled -}}
 {{- $fullName := .Release.Name -}}
 {{- $svcPort := .Values.service.port -}}
+{{- $path := tpl .Values.ingress.path . | quote -}}
 {{- if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion -}}
 apiVersion: networking.k8s.io/v1beta1
 {{- else -}}
@@ -33,7 +34,7 @@ spec:
         - backend:
             serviceName: {{ $fullName }}
             servicePort: {{ $svcPort }}
-          path: {{ tpl .Values.ingress.path . | quote  }}
+          path: {{ $path  }}
      {{- if .host }}
       host: {{ .host | quote }}
      {{- end }}

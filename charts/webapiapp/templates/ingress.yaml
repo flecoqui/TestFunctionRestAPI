@@ -11,10 +11,10 @@ metadata:
   name: {{ $fullName }}
   labels:
     {{- include "webapiapp.labels" . | nindent 4 }}
-  {{- with .Values.ingress.annotations }}
-  annotations:
-    {{- toYaml . | nindent 4 }}
-  {{- end }}
+  annotations: 
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/use-regex: {{ tpl .Values.ingress.useregex . | quote  }}
+    nginx.ingress.kubernetes.io/rewrite-target: {{ tpl .Values.ingress.rewritepath . | quote  }}
 spec:
 {{- if .Values.ingress.tls }}
   tls:
@@ -33,7 +33,7 @@ spec:
         - backend:
             serviceName: {{ $fullName }}
             servicePort: {{ $svcPort }}
-          path: /{{ $fullName }}(/|$)(.*)
+          path: {{ tpl .Values.ingress.path . | quote  }}
      {{- if .host }}
       host: {{ .host | quote }}
      {{- end }}

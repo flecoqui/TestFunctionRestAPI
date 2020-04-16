@@ -86,9 +86,13 @@ service:
 #
 ingress:
   enabled: true
-  annotations: 
-    kubernetes.io/ingress.class: nginx
-    nginx.ingress.kubernetes.io/rewrite-target: /$2 
+  #annotations: 
+  #  kubernetes.io/ingress.class: nginx
+  #  nginx.ingress.kubernetes.io/use-regex: "true"
+  #  nginx.ingress.kubernetes.io/rewrite-target: /$2 
+  useregex: "false"
+  path: /{{ $fullName }}(/|$)(.*)
+  rewritepath: /$2
   hosts: 
     - host: 
   tls: []

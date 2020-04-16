@@ -5,10 +5,6 @@ webapiapp FullName {{ include "webapiapp.fullname" .}}
 webapiapp Name {{ include "webapiapp.name" . }}
 Test the application deployment with the following curl commands:
 {{- $fullName := .Release.Name -}}
-{{- range $key, $value := index .Values.ingress.hosts 0 }}
-curl -d "{\"name\":\"0123456789\"}" -H "Content-Type: application/json"  -X POST   http://{{ $value }}/{{ $fullName }}/api/values
-curl -H "Content-Type: application/json"  -X GET   http://{{ $value }}/{{ $fullName }}/api/test
-{{- end }}
 {{- if .Values.ingress.enabled }}
 kubectl get pods --namespace {{ .Release.Namespace }}
 {{- end }}

@@ -34,7 +34,7 @@ spec:
         - backend:
             serviceName: {{ $fullName }}
             servicePort: {{ $svcPort }}
-          path: {{ tpl $path . | quote }}
+          path: {{ tpl .Values.ingress.path . | quote }}
      {{- if .host }}
       host: {{ .host | quote }}
      {{- end }}

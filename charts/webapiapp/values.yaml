@@ -93,9 +93,8 @@ ingress:
   useregex: "false"
   path: "/{{ .Release.Name }}(/|$)(.*)"
   rewritepath: /$2
-  hosts: 
-    - host: 
-      path: "/{{ .Release.Name }}(/|$)(.*)"
+  # hosts: 
+  #  - host: 
   tls: []
   #  - secretName: chart-example-tls
   #    hosts:

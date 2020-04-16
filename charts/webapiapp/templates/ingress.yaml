@@ -13,7 +13,7 @@ metadata:
     {{- include "webapiapp.labels" . | nindent 4 }}
   annotations: 
     kubernetes.io/ingress.class: nginx
-    nginx.ingress.kubernetes.io/use-regex: {{ tpl .Values.ingress.useregex . | quote  }}
+    nginx.ingress.kubernetes.io/use-regex: {{ .Values.ingress.useregex }}
     nginx.ingress.kubernetes.io/rewrite-target: {{ tpl .Values.ingress.rewritepath . | quote  }}
 spec:
 {{- if .Values.ingress.tls }}

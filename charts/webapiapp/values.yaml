@@ -91,7 +91,7 @@ ingress:
   #  nginx.ingress.kubernetes.io/use-regex: "true"
   #  nginx.ingress.kubernetes.io/rewrite-target: /$2 
   useregex: "false"
-  path: /{{ $fullName }}(/|$)(.*)
+  path: "/{{ .Release.Name }}(/|$)(.*)"
   rewritepath: /$2
   hosts: 
     - host: 
